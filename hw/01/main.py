@@ -1,42 +1,41 @@
 import gurobipy as g
 import sys
 
+# Get input and output args
 if len(sys.argv) < 3:
     raise ValueError("Please execute the program with the specified arguments: the first argument being the input file path and the second argument being the desired output destination.")
 
 path_input = sys.argv[1]
 path_output = sys.argv[2]
 
+# Load variables
 with open(path_input, "r") as f:
-    d_row = [int(num) for num in f.readline().split()]
-    e_row = [int(num) for num in f.readline().split()]
-    D_row = int(f.readline())
+    d = [int(num) for num in f.readline().split()]
+    e = [int(num) for num in f.readline().split()]
+    D = int(f.readline())
 
 print("INPUT")
-print(d_row)
-print(e_row)
-print(D_row)
+print(d)
+print(e)
+print(D)
 
+# Optimalization
+m = g.Model()
 
-# d = [6, 6, 6, 6, 6, 8, 9, 12, 18, 22, 25, 21, 21,
-#      20, 18, 21, 21, 24, 24, 18, 18, 18, 12, 8]
+xs = m.addVars(len(d), lb=0, vtype=g.GRB.INTEGER,
+               name=[f"x{i}" for i in range(len(d))])
 
-# m = g.Model()
+for i in range(len(d)):
+    m.addConstr(g.quicksum(xs[j % len(d)]
+                for j in range(i - 7, i + 1)) >= d[i])
 
-# xs = m.addVars(len(d), lb=0, vtype=g.GRB.INTEGER,
-#                name=[f"x{i}" for i in range(len(d))])
+m.setObjective(xs.sum(), sense=g.GRB.MINIMIZE)
 
-# for i in range(len(d)):
-#     m.addConstr(g.quicksum(xs[j % len(d)]
-#                 for j in range(i - 7, i + 1)) >= d[i])
+m.optimize()
 
-# m.setObjective(xs.sum(), sense=g.GRB.MINIMIZE)
-
-# m.optimize()
-
-
-objective = 1536
-optimal_vals = [12, 48, 65, 13, 57]
+# Print output
+optimal_vals = [int(xs[x].x) for x in xs]
+objective = int(m.getObjective().getValue())
 
 print("OUTPUT")
 print(objective)
