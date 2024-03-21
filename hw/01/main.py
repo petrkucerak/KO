@@ -22,19 +22,32 @@ print(D)
 # Optimalization
 m = g.Model()
 
-xs = m.addVars(len(d), lb=0, vtype=g.GRB.INTEGER,
-               name=[f"x{i}" for i in range(len(d))])
+week_duration = 168
+day_duration = 24
 
-for i in range(len(d)):
-    m.addConstr(g.quicksum(xs[j % len(d)]
-                for j in range(i - 7, i + 1)) >= d[i])
+x = m.addVars(week_duration, lb=0, vtype=g.GRB.INTEGER)
+z = m.addVars(week_duration, lb=0, vtype=g.GRB.INTEGER)
 
-m.setObjective(xs.sum(), sense=g.GRB.MINIMIZE)
+for i in range(week_duration):
+    if i < 120:
+        q = d[i % 24]
+    else:
+        q = e[i % 24]
+
+    m.addConstr(q - g.quicksum(x[j % week_duration]
+                for j in range(i-7, i + 1)) <= z[i])
+    m.addConstr(g.quicksum(x[j % week_duration]
+                for j in range(i-7, i + 1)) - q <= z[i])
+    m.addConstr(q - g.quicksum(x[j % week_duration]
+                for j in range(i-7, i + 1)) <= D)
+
+
+m.setObjective(g.quicksum(z), sense=g.GRB.MINIMIZE)
 
 m.optimize()
 
 # Print output
-optimal_vals = [int(xs[x].x) for x in xs]
+optimal_vals = [int(x[i].x) for i in x]
 objective = int(m.getObjective().getValue())
 
 print("OUTPUT")
