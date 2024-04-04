@@ -20,4 +20,13 @@ with open(path_input, "r") as f:
     data = []
     for i in range(n):
         line = f.readline().split()
-
+        frame = []
+        for col in range(w):
+            colum = []
+            for row in range(h):
+                pixel = [line[col*h + row],
+                         line[col*h + row + 1], line[col*h + row + 2]]
+                colum.append(pixel)
+            frame.append(colum)
+        data.append(frame)
+    print(data)
