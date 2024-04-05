@@ -22,7 +22,7 @@ def my_callback(model, where):
                     visited[current_node] = 1
                     cycle.append(current_node)
                     for j in range(x_len):
-                        if model.cbGetSolution(x[current_node][j]) == 1:
+                        if round(model.cbGetSolution(x[current_node][j])) == 1:
                             current_node = j
                             break
                 cycles.append(cycle)
@@ -96,15 +96,15 @@ m.setObjective(g.quicksum(x[i][j]*dist_matrix[i][j]
                for j in range(x_len) for i in range(x_len)), g.GRB.MINIMIZE)
 m.optimize(my_callback)
 
-for i in x:
-    print([int(np.abs(i[j].x)) for j in range(x_len)])
+# for i in x:
+#     print([int(np.abs(i[j].x)) for j in range(x_len)])
 
 ret = ""
 line = x_len - 1  # start from dummy stripe
 visited_nodes_num = 0
 while visited_nodes_num < x_len-1:
     for j in range(x_len):
-        if x[line][j].x == 1:
+        if round(x[line][j].x) == 1:
             visited_nodes_num += 1
             line = j
             ret += str(j+1) + " "
