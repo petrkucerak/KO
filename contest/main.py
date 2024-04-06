@@ -23,7 +23,9 @@ m = g.Model()
 
 c = m.addVars(edge_count, vtype=g.GRB.BINARY)
 
-m.setObjective(g.quicksum(c[i]*graph[i][2] for i in range(edge_count)), g.GRB.MINIMIZE)
+time = m.addVars(edge_count, vtype=g.GRB.INTEGER, lb=0, ub=edge_count - 1)
+
+m.setObjective(g.quicksum(c[i]*graph[i][2] for i in range(edge_count)), g.GRB.MAXIMIZE)
 
 m.optimize()
 
@@ -32,3 +34,5 @@ for i in range(edge_count):
     if round(c[i].X) == 0:
         ret += str(round(graph[i][0])) + " " + str(round(graph[i][1])) + "\n"
 print(ret)
+with open(path_output, "w+") as f:
+    f.write(ret)
