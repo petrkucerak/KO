@@ -19,4 +19,16 @@ with open(path_input, "r") as f:
         edge = f.readline().split()
         graph[i] = [int(edge[0]), int(edge[1]), int(edge[2])]
 
-print(graph)
+m = g.Model()
+
+c = m.addVars(edge_count, vtype=g.GRB.BINARY)
+
+m.setObjective(g.quicksum(c[i]*graph[i][2] for i in range(edge_count)), g.GRB.MINIMIZE)
+
+m.optimize()
+
+ret = ""
+for i in range(edge_count):
+    if round(c[i].X) == 0:
+        ret += str(round(graph[i][0])) + " " + str(round(graph[i][1])) + "\n"
+print(ret)
