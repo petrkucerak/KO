@@ -36,13 +36,14 @@ nodes_count += 1
 
 m = g.Model()
 
+M = nodes_count
+
 e = m.addVars(edge_count, vtype=g.GRB.BINARY, name="Existence")
 t = m.addVars(nodes_count, vtype=g.GRB.INTEGER,
               lb=0, ub=nodes_count, name="Time")
 
 for i in range(edge_count):
-    print(graph[i]["out"])
-    m.addConstr(e[i] * t[graph[i]["out"]] + 1 <= t[graph[i]["in"]])
+    m.addConstr(t[graph[i]["out"]] + 1 <= t[graph[i]["in"]] + (1 - e[i]) * M)
 
 m.setObjective(g.quicksum(graph[i]["cost"]*e[i]
                for i in range(edge_count)), g.GRB.MAXIMIZE)
