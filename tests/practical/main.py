@@ -30,11 +30,37 @@ with open(path_input, "r") as f:
     for i in range(rock_count):
         line = f.readline().split()
         rock_positions.append({"x": int(line[0]), "y": int(line[1])})
-    
 
 
-# m = g.Model()
+m = g.Model()
+# create the river model
+river = np.zeros((height, width))
+for y in range(height):
+    for x in range(width):
+        river[y, x] = river_strength[x]
+for i in range(rock_count):
+    river[rock_positions[i]["y"], rock_positions[i]["x"]] = 0
+
+print(river)
+
+power = m.addVars(height, width, vtype=g.GRB.BINARY,
+                  name="Existence of power turbine")
 
 
-# king_count = 0
-# ret = ""
+m.setObjective(g.quicksum(power[y, x] * river[y, x]
+                          for x in range(width) for y in range(height)),
+               g.GRB.MAXIMIZE)
+
+m.optimize()
+
+power_output = 0
+ret = ""
+
+for y in range(height):
+    for x in range(height):
+        if power[y, x].x == 1:
+            ret += str(x) + " " + str(y) + "\n"
+            power_output += river[y,x]
+ret = str(round(power_output)) + "\n" + ret
+
+print(ret)
