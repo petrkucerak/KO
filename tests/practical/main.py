@@ -51,6 +51,8 @@ power = m.addVars(height, width, vtype=g.GRB.BINARY,
 m.addConstr(power.sum() <= max_dams)
 
 # limit count of power station for each stream
+for x in range(width):
+    m.addConstr(g.quicksum(power[y,x] for y in range(height)) <= max_single_dams)
 
 
 m.setObjective(g.quicksum(power[y, x] * river[y, x]
