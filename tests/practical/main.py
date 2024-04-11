@@ -12,37 +12,29 @@ path_output = sys.argv[2]
 
 
 with open(path_input, "r") as f:
-    print("Load data")
+    # load metadata
+    metadata = f.readline().split()
+    width = int(metadata[0])            # N
+    height = int(metadata[1])           # M
+    max_dams = int(metadata[2])         # D
+    max_single_dams = int(metadata[3])  # S
+    rock_count = int(metadata[4])       # R
 
-m = g.Model()
+    # load river strength
+    river_strength = f.readline().split()
+    for i in range(width):
+        river_strength[i] = int(river_strength[i])
 
-# chess_board = m.addVars(chess_size, chess_size, vtype=g.GRB.BINARY)
-
-# for i in range(2, chess_size - 2):
-#     for j in range(2, chess_size - 2):
-#         m.addConstr(
-#             chess_board[i, j]  # main
-#             + chess_board[i - 2, j - 1] + chess_board[i - 1, j - 2]
-#             + chess_board[i - 2, j + 1] + chess_board[i + 1, j - 2]
-#             + chess_board[i + 2, j - 1] + chess_board[i - 1, j + 2]
-#             + chess_board[i + 2, j + 1] + chess_board[i + 1, j + 2]
-#             <= 1)
+    # load rock positions
+    rock_positions = []
+    for i in range(rock_count):
+        line = f.readline().split()
+        rock_positions.append({"x": int(line[0]), "y": int(line[1])})
+    
 
 
-# m.setObjective(chess_board.sum(), g.GRB.MAXIMIZE)
-
-m.optimize()
+# m = g.Model()
 
 
-king_count = 0
-ret = ""
-
-# for i in range(2, chess_size - 2):
-#     for j in range(2, chess_size - 2):
-#         if round(chess_board[i, j].x) == 1:
-#             king_count += 1
-#             ret += str(num2str[i-2]) + str(j-2+1) + "\n"
-
-# ret = str(king_count)+"\n" + ret
-# with open(path_output, "w+") as f:
-#     f.write(ret)
+# king_count = 0
+# ret = ""
