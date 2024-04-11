@@ -47,6 +47,12 @@ power = m.addVars(height, width, vtype=g.GRB.BINARY,
                   name="Existence of power turbine")
 
 
+# limit count of power plats in all river
+m.addConstr(power.sum() <= max_dams)
+
+# limit count of power station for each stream
+
+
 m.setObjective(g.quicksum(power[y, x] * river[y, x]
                           for x in range(width) for y in range(height)),
                g.GRB.MAXIMIZE)
@@ -57,10 +63,13 @@ power_output = 0
 ret = ""
 
 for y in range(height):
-    for x in range(height):
-        if power[y, x].x == 1:
+    for x in range(width):
+        if round(power[y, x].x) == 1:
             ret += str(x) + " " + str(y) + "\n"
-            power_output += river[y,x]
+            power_output += river[y, x]
 ret = str(round(power_output)) + "\n" + ret
 
 print(ret)
+
+with open(path_output, "w+") as f:
+    f.write(ret)
