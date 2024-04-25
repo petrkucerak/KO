@@ -36,7 +36,7 @@ int number_of_products = 0;
 vector<struct customer> customers;
 vector<int> products;
 
-void load(char *input_path)
+void load_file(char *input_path)
 {
    FILE *f = fopen(input_path, "r");
 
@@ -87,7 +87,7 @@ void out_sol(char *output_file, struct flow_node *customer_nodes)
    fclose(f);
 }
 
-void out_inf(char *output_file)
+void write_output(char *output_file)
 {
    FILE *f = fopen(output_file, "w+");
 
@@ -234,10 +234,10 @@ void free_all(flow_node &s, flow_node *customer_nodes, flow_node *product_nodes)
 int main(int argc, char **argv)
 {
    if (argc < 3) {
-      cout << "Specify 2 arguments. Example: './program <input path> <output "
-              "path>'\n";
+      cout << "Specify 2 arguments. Example: "
+           << "'./program <input path> <output_path>'\n";
    }
-   load(argv[1]);
+   load_file(argv[1]);
 
    int term_names = -1;
    struct flow_node s;
@@ -369,7 +369,7 @@ int main(int argc, char **argv)
 
    for (auto &b : new_s.outbound_edges) {
       if (b->flow != b->upper_bound) {
-         out_inf(argv[2]);
+         write_output(argv[2]);
          cerr << "Infusible!\n";
          return 0;
       }
