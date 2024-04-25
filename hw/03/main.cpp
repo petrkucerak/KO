@@ -6,34 +6,34 @@
 
 using namespace std;
 
-struct edge {
+typedef struct edge {
    struct flow_node *from, *to;
    int lower_bound;
    int upper_bound;
    int flow;
    bool natural;
    int increment;
-};
+} edge_t;
 
-struct flow_node {
-   vector<struct edge *> inbound_edges;
-   vector<struct edge *> outbound_edges;
-   struct edge *augmenting_edge;
+typedef struct flow_node {
+   vector<edge_t *> inbound_edges;
+   vector<edge_t *> outbound_edges;
+   edge_t *augmenting_edge;
    int iteration;
    int name;
    int balance;
-};
+} flow_node_t;
 
-struct customer {
+typedef struct customer {
    int lower_bound;
    int upper_bound;
    vector<int> bought_products;
-};
+} customer_t;
 
 int number_of_customers = 0;
 int number_of_products = 0;
 
-vector<struct customer> customers;
+vector<customer_t> customers;
 vector<int> products;
 
 /**
@@ -51,20 +51,20 @@ void load_file(char *input_path)
    }
    fscanf(f, "%i %i", &number_of_customers, &number_of_products);
    for (int i = 0; i < number_of_customers; i++) {
-      struct customer temp;
-      fscanf(f, " %i %i", &temp.lower_bound, &temp.upper_bound);
+      customer_t tmp;
+      fscanf(f, " %i %i", &tmp.lower_bound, &tmp.upper_bound);
       char c;
       while ((c = fgetc(f)) != '\n') {
          int t;
          fscanf(f, "%i", &t);
-         temp.bought_products.push_back(t - 1);
+         tmp.bought_products.push_back(t - 1);
       }
-      customers.push_back(temp);
+      customers.push_back(tmp);
    }
    for (int i = 0; i < number_of_products; i++) {
-      int temp;
-      fscanf(f, "%i", &temp);
-      products.push_back(temp);
+      int tmp;
+      fscanf(f, "%i", &tmp);
+      products.push_back(tmp);
    }
    fclose(f);
 }
@@ -75,7 +75,7 @@ void load_file(char *input_path)
  * @param output_file
  * @param customer_nodes
  */
-void write_output_sol(char *output_file, struct flow_node *customer_nodes)
+void write_output_sol(char *output_file, flow_node_t *customer_nodes)
 {
    FILE *f = fopen(output_file, "w+");
 
@@ -117,7 +117,7 @@ void write_output_inf(char *output_file)
    fclose(f);
 }
 
-void compute_balance(struct flow_node &n)
+void compute_balance(flow_node_t &n)
 {
    int sum_inbound = 0, sum_outbound = 0;
    for (const auto &e : n.inbound_edges) {
@@ -129,7 +129,7 @@ void compute_balance(struct flow_node &n)
    n.balance = sum_inbound - sum_outbound;
 }
 
-void update_bounds(struct flow_node &n)
+void update_bounds(flow_node_t &n)
 {
    for (auto &e : n.inbound_edges) {
       e->upper_bound -= e->lower_bound;
@@ -141,11 +141,11 @@ void update_bounds(struct flow_node &n)
    }
 }
 
-void connect_based_on_balance(struct flow_node &n, struct flow_node &new_s,
-                              struct flow_node &new_t)
+void connect_based_on_balance(flow_node_t &n, flow_node_t &new_s,
+                              flow_node_t &new_t)
 {
    if (n.balance > 0) {
-      struct edge *e = new edge;
+      edge_t *e = new edge_t;
       e->lower_bound = 0;
       e->flow = 0;
       e->upper_bound = n.balance;
@@ -154,7 +154,7 @@ void connect_based_on_balance(struct flow_node &n, struct flow_node &new_s,
       new_s.outbound_edges.push_back(e);
       n.inbound_edges.push_back(e);
    } else if (n.balance < 0) {
-      struct edge *e = new edge;
+      edge_t *e = new edge_t;
       e->lower_bound = 0;
       e->flow = 0;
       e->upper_bound = -n.balance;
@@ -165,7 +165,7 @@ void connect_based_on_balance(struct flow_node &n, struct flow_node &new_s,
    }
 }
 
-int search(flow_node &s, flow_node &t)
+int search(flow_node_t &s, flow_node_t &t)
 {
    int terminate = t.name;
    int iteration = ++s.iteration;
@@ -178,7 +178,7 @@ int search(flow_node &s, flow_node &t)
       current_node = st.front();
       st.pop();
       if (current_node->name == terminate) {
-         edge *e = current_node->augmenting_edge;
+         edge_t *e = current_node->augmenting_edge;
          int max_flow_increase = INT32_MAX;
          while (e != nullptr) {
             max_flow_increase = min(max_flow_increase, e->increment);
@@ -212,12 +212,12 @@ int search(flow_node &s, flow_node &t)
    return 0;
 }
 
-void ford_fulkerson(flow_node &s, flow_node &t)
+void ford_fulkerson(flow_node_t &s, flow_node_t &t)
 {
-   flow_node *current_node = &t;
+   flow_node_t *current_node = &t;
    int flow_increase;
    while ((flow_increase = search(s, t)) != 0) {
-      edge *curr_aug_path = current_node->augmenting_edge;
+      edge_t *curr_aug_path = current_node->augmenting_edge;
       while (curr_aug_path != nullptr) {
          if (curr_aug_path->natural) {
             curr_aug_path->flow += flow_increase;
@@ -230,7 +230,8 @@ void ford_fulkerson(flow_node &s, flow_node &t)
    }
 }
 
-void free_all(flow_node &s, flow_node *customer_nodes, flow_node *product_nodes)
+void free_all(flow_node_t &s, flow_node_t *customer_nodes,
+              flow_node_t *product_nodes)
 {
    for (auto &e : s.outbound_edges) {
       delete e;
@@ -256,27 +257,27 @@ int main(int argc, char **argv)
    load_file(argv[1]);
 
    int term_names = -1;
-   struct flow_node s;
+   flow_node_t s;
    s.iteration = 0;
    s.name = term_names--;
-   struct flow_node t;
+   flow_node_t t;
    t.iteration = 0;
    t.name = term_names--;
-   struct flow_node customer_nodes[number_of_customers];
-   struct flow_node product_nodes[number_of_products];
+   flow_node_t customer_nodes[number_of_customers];
+   flow_node_t product_nodes[number_of_products];
 
-   struct flow_node s1;
+   flow_node_t s1;
    s1.iteration = 0;
    s1.name = term_names--;
-   struct flow_node t1;
+   flow_node_t t1;
    t1.iteration = 0;
    t1.name = term_names--;
 
-   struct flow_node customer_nodes_1[number_of_customers];
-   struct flow_node product_nodes_1[number_of_products];
+   flow_node_t customer_nodes_1[number_of_customers];
+   flow_node_t product_nodes_1[number_of_products];
 
    for (int i = 0; i < number_of_customers; i++) {
-      struct edge *e = new edge, *e1 = new edge;
+      edge_t *e = new edge_t, *e1 = new edge_t;
 
       e->lower_bound = customers[i].lower_bound;
       e->upper_bound = customers[i].upper_bound;
@@ -299,7 +300,7 @@ int main(int argc, char **argv)
       customer_nodes_1[i].name = i;
 
       for (auto u : customers[i].bought_products) {
-         struct edge *ee = new edge, *ee1 = new edge;
+         edge_t *ee = new edge_t, *ee1 = new edge_t;
          ee->lower_bound = 0;
          ee->upper_bound = 1;
          ee->flow = 0;
@@ -318,7 +319,7 @@ int main(int argc, char **argv)
       }
    }
    for (int i = 0; i < number_of_products; i++) {
-      struct edge *e = new edge, *e1 = new edge;
+      edge_t *e = new edge_t, *e1 = new edge_t;
       e->from = &product_nodes[i];
       e->to = &t;
       e->lower_bound = products[i];
@@ -340,7 +341,7 @@ int main(int argc, char **argv)
       product_nodes_1[i].name = i;
    }
 
-   struct edge *overflow_edge = new edge;
+   edge_t *overflow_edge = new edge_t;
    overflow_edge->lower_bound = 0;
    overflow_edge->flow = 0;
    overflow_edge->upper_bound = INT32_MAX;
@@ -366,10 +367,10 @@ int main(int argc, char **argv)
       update_bounds(i);
    }
 
-   struct flow_node new_s;
+   flow_node_t new_s;
    new_s.name = term_names--;
    new_s.iteration = 0;
-   struct flow_node new_t;
+   flow_node_t new_t;
    new_t.name = term_names--;
    new_t.iteration = 0;
    connect_based_on_balance(s1, new_s, new_t);
