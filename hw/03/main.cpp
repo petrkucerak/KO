@@ -36,12 +36,17 @@ int number_of_products = 0;
 vector<struct customer> customers;
 vector<int> products;
 
+/**
+ * @brief Open the file and load input data
+ *
+ * @param input_path
+ */
 void load_file(char *input_path)
 {
    FILE *f = fopen(input_path, "r");
 
    if (f == nullptr) {
-      cout << "Please, specify the input file path\n";
+      cout << "Could not open file with input [load_file]\n";
       return;
    }
    fscanf(f, "%i %i", &number_of_customers, &number_of_products);
@@ -64,12 +69,18 @@ void load_file(char *input_path)
    fclose(f);
 }
 
-void out_sol(char *output_file, struct flow_node *customer_nodes)
+/**
+ * @brief Create file and write success solution
+ *
+ * @param output_file
+ * @param customer_nodes
+ */
+void write_output_sol(char *output_file, struct flow_node *customer_nodes)
 {
    FILE *f = fopen(output_file, "w+");
 
    if (f == nullptr) {
-      cout << "Please, specify the output file path\n";
+      cout << "Could not create file with solution [write_output_sol]\n";
       return;
    }
 
@@ -87,12 +98,17 @@ void out_sol(char *output_file, struct flow_node *customer_nodes)
    fclose(f);
 }
 
-void write_output(char *output_file)
+/**
+ * @brief Create file and write infusible solution
+ *
+ * @param output_file
+ */
+void write_output_inf(char *output_file)
 {
    FILE *f = fopen(output_file, "w+");
 
    if (f == nullptr) {
-      cout << "could not create file\n";
+      cout << "Could not create file with solution [write_output_inf]\n";
       return;
    }
 
@@ -369,7 +385,7 @@ int main(int argc, char **argv)
 
    for (auto &b : new_s.outbound_edges) {
       if (b->flow != b->upper_bound) {
-         write_output(argv[2]);
+         write_output_inf(argv[2]);
          cerr << "Infusible!\n";
          return 0;
       }
@@ -410,7 +426,7 @@ int main(int argc, char **argv)
 
    ford_fulkerson(s, t);
 
-   out_sol(argv[2], customer_nodes);
+   write_output_sol(argv[2], customer_nodes);
 
    free_all(s, customer_nodes, product_nodes);
    free_all(new_s, customer_nodes_1, product_nodes_1);
