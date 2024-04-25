@@ -225,6 +225,13 @@ int search(flow_node_t &s, flow_node_t &t)
    return 0;
 }
 
+/**
+ * @brief Implementation Ford Fulkerson algorithm
+ * https://cs.wikipedia.org/wiki/Ford%C5%AFv%E2%80%93Fulkerson%C5%AFv_algoritmus
+ *
+ * @param s start node
+ * @param t target node
+ */
 void ford_fulkerson(flow_node_t &s, flow_node_t &t)
 {
    flow_node_t *current_node = &t;
