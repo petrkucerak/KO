@@ -1,3 +1,16 @@
+/**
+ * @file main.cpp
+ * @author Petr Kucera (kucerp28@fel.cvut.cz)
+ * @brief Implementation Ford Fulkerson algorithm to solve problem thats
+ * describe in `2024_hw03.pdf` file. The implementation is inspired by Jakub
+ * Jira implementation (https://github.com/japawBlob/B4M35KO).
+ * @version 0.1
+ * @date 2024-04-25
+ *
+ * @copyright Copyright (c) 2024
+ *
+ */
+
 #include <cstring>
 #include <iostream>
 #include <queue>
@@ -230,8 +243,8 @@ void ford_fulkerson(flow_node_t &s, flow_node_t &t)
    }
 }
 
-void free_all(flow_node_t &s, flow_node_t *customer_nodes,
-              flow_node_t *product_nodes)
+void free_resources(flow_node_t &s, flow_node_t *customer_nodes,
+                    flow_node_t *product_nodes)
 {
    for (auto &e : s.outbound_edges) {
       delete e;
@@ -429,8 +442,8 @@ int main(int argc, char **argv)
 
    write_output_sol(argv[2], customer_nodes);
 
-   free_all(s, customer_nodes, product_nodes);
-   free_all(new_s, customer_nodes_1, product_nodes_1);
+   free_resources(s, customer_nodes, product_nodes);
+   free_resources(new_s, customer_nodes_1, product_nodes_1);
 
    for (auto &e : t1.outbound_edges) {
       delete e;
