@@ -22,7 +22,6 @@ struct flow_node {
    int iteration;
    int name;
    int balance;
-   // bool isS, isT;
 };
 
 struct customer {
@@ -42,7 +41,7 @@ void load(char *input_path)
    FILE *f = fopen(input_path, "r");
 
    if (f == nullptr) {
-      cout << "input file not found\n";
+      cout << "Please, specify the input file path\n";
       return;
    }
    fscanf(f, "%i %i", &number_of_customers, &number_of_products);
@@ -65,37 +64,12 @@ void load(char *input_path)
    fclose(f);
 }
 
-void out(char *output_file)
-{
-   FILE *f = fopen(output_file, "w+");
-
-   if (f == nullptr) {
-      cout << "could not create file\n";
-      return;
-   }
-
-   fprintf(f, "%i %i\n", number_of_customers, number_of_products);
-
-   for (const auto &c : customers) {
-      fprintf(f, "%i %i", c.lower_bound, c.upper_bound);
-      for (auto p : c.bought_products) {
-         fprintf(f, " %i", p);
-      }
-      fprintf(f, "\n");
-   }
-   for (int i = 0; i < number_of_products; i++) {
-      fprintf(f, "%i ", products[i]);
-   }
-   fprintf(f, "\n");
-   fclose(f);
-}
-
 void out_sol(char *output_file, struct flow_node *customer_nodes)
 {
    FILE *f = fopen(output_file, "w+");
 
    if (f == nullptr) {
-      cout << "could not create file\n";
+      cout << "Please, specify the output file path\n";
       return;
    }
 
@@ -110,7 +84,6 @@ void out_sol(char *output_file, struct flow_node *customer_nodes)
       cout << endl;
    }
 
-   // fprintf(f, "\n");
    fclose(f);
 }
 
@@ -126,50 +99,6 @@ void out_inf(char *output_file)
    fprintf(f, "-1\n");
 
    fclose(f);
-}
-
-void print_graph(struct flow_node &s, struct flow_node &t,
-                 struct flow_node *customer_nodes,
-                 struct flow_node *product_nodes)
-{
-   //    int name = 10;
-   //    s.iteration = -1;
-   //    t.iteration = -2;
-   //    for (int i = 0; i < number_of_customers; ++i){
-   //        customer_nodes[i].iteration = name++;
-   //    }
-   //    name = 20;
-   //    for (int i = 0; i < number_of_products; ++i){
-   //        product_nodes[i].iteration = name++;
-   //    }
-   cout << s.name << "\n";
-   cout << "---- s start -----\n";
-   for (const auto &e : s.outbound_edges) {
-      cout << e->lower_bound << " " << e->flow << " " << e->upper_bound << " "
-           << e->to->name << "\n";
-   }
-   cout << "---- cust start -----\n";
-   for (int i = 0; i < number_of_customers; ++i) {
-      for (const auto &e : customer_nodes[i].outbound_edges) {
-         cout << e->lower_bound << " " << e->flow << " " << e->upper_bound
-              << " " << e->to->name << "\n";
-      }
-   }
-   cout << "---- prod start -----\n";
-   for (int i = 0; i < number_of_products; ++i) {
-      for (const auto &e : product_nodes[i].outbound_edges) {
-         cout << e->lower_bound << " " << e->flow << " " << e->upper_bound
-              << " " << e->to->name << "\n";
-      }
-   }
-   //    for (int i = 0; i < number_of_products; ++i) {
-   //        for (int j = 0; j < product_nodes[i].outbound_edges.size();j++) {
-   //            cout << product_nodes[i].outbound_edges[j].lower_bound << " "
-   //            << product_nodes[i].outbound_edges[j].flow << " " <<
-   //            product_nodes[i].outbound_edges[j].upper_bound << " " <<
-   //            product_nodes[i].outbound_edges[j].to->name <<"\n";
-   //        }
-   //    }
 }
 
 void compute_balance(struct flow_node &n)
@@ -305,7 +234,8 @@ void free_all(flow_node &s, flow_node *customer_nodes, flow_node *product_nodes)
 int main(int argc, char **argv)
 {
    if (argc < 3) {
-      cout << "need 2 arguments: ./program <input path> <output path>\n";
+      cout << "Specify 2 arguments. Example: './program <input path> <output "
+              "path>'\n";
    }
    load(argv[1]);
 
@@ -316,8 +246,6 @@ int main(int argc, char **argv)
    struct flow_node t;
    t.iteration = 0;
    t.name = term_names--;
-   //    vector<struct flow_node> customer_nodes;
-   //    vector<struct flow_node> product_nodes;
    struct flow_node customer_nodes[number_of_customers];
    struct flow_node product_nodes[number_of_products];
 
@@ -331,13 +259,8 @@ int main(int argc, char **argv)
    struct flow_node customer_nodes_1[number_of_customers];
    struct flow_node product_nodes_1[number_of_products];
 
-   // vector<edge *> edges;
-   // vector<edge *> edges_1;
-
    for (int i = 0; i < number_of_customers; i++) {
       struct edge *e = new edge, *e1 = new edge;
-      // edges.push_back(e);
-      // edges_1.push_back(e1);
 
       e->lower_bound = customers[i].lower_bound;
       e->upper_bound = customers[i].upper_bound;
@@ -400,11 +323,6 @@ int main(int argc, char **argv)
       product_nodes_1[i].iteration = 0;
       product_nodes_1[i].name = i;
    }
-   // print_graph(s,t,customer_nodes,product_nodes);
-
-   // Finding initial flow
-
-   // print_graph(s1,t1,customer_nodes_1,product_nodes_1);
 
    struct edge *overflow_edge = new edge;
    overflow_edge->lower_bound = 0;
@@ -447,18 +365,12 @@ int main(int argc, char **argv)
       connect_based_on_balance(i, new_s, new_t);
    }
 
-   // print_graph(s,t,customer_nodes,product_nodes);
-   // cout << "===========================\n";
-   // print_graph(new_s,new_t,customer_nodes_1,product_nodes_1);
-
    ford_fulkerson(new_s, new_t);
-
-   // print_graph(new_s,new_t,customer_nodes_1,product_nodes_1);
 
    for (auto &b : new_s.outbound_edges) {
       if (b->flow != b->upper_bound) {
          out_inf(argv[2]);
-         cerr << "could not find feasible initial flow\n";
+         cerr << "Infusible!\n";
          return 0;
       }
    }
@@ -472,14 +384,6 @@ int main(int argc, char **argv)
           e->flow + s.outbound_edges[count]->lower_bound;
       count++;
    }
-   //    count = 0;
-   //    for (auto & e : t1.inbound_edges){
-   //        if(e->from->name == new_s.name){
-   //            continue;
-   //        }
-   //        t.inbound_edges[count]->flow =
-   //        e->flow+t.inbound_edges[count].lower_bound; count++;
-   //    }
 
    for (int i = 0; i < number_of_customers; i++) {
       count = 0;
@@ -491,35 +395,6 @@ int main(int argc, char **argv)
              e->flow + customer_nodes[i].outbound_edges[count]->lower_bound;
          count++;
       }
-      //        count = 0;
-      //        for (auto & e : product_nodes_1[i].inbound_edges){
-      //            if(e.to->name == new_t.name) {
-      //                continue;
-      //            }
-      //            product_nodes[i].inbound_edges[count].flow =
-      //            e.flow+product_nodes[i].inbound_edges[count].lower_bound;
-      //            count++;
-      //        }
-      //        for (auto & e_1 : customer_nodes_1[i].outbound_edges){
-      //            if(e_1.to->name == new_t.name){
-      //                continue;
-      //            }
-      //            for (auto & e : customer_nodes[i].outbound_edges) {
-      //                if(e_1.to->name == e.to->name && e_1.from->name ==
-      //                e.from->name){
-      //                    e.flow = e_1.flow+e.lower_bound;
-      //                }
-      //            }
-      //        }
-      //        count = 0;
-      //        for (auto & e : customer_nodes_1[i].inbound_edges){
-      //            if(e->from->name == new_t.name){
-      //                continue;
-      //            }
-      //            customer_nodes[i].inbound_edges[count]->flow =
-      //            e->flow+customer_nodes[i].inbound_edges[count]->lower_bound;
-      //            count++;
-      //        }
    }
    for (int i = 0; i < number_of_products; i++) {
       count = 0;
@@ -531,21 +406,9 @@ int main(int argc, char **argv)
              e->flow + product_nodes[i].outbound_edges[count]->lower_bound;
          count++;
       }
-      //        count = 0;
-      //        for (auto & e : product_nodes_1[i].inbound_edges){
-      //            if(e.from->name == new_t.name){
-      //                continue;
-      //            }
-      //            product_nodes[i].inbound_edges[count].flow =
-      //            e.flow+product_nodes[i].inbound_edges[count].lower_bound;
-      //            count++;
-      //        }
    }
-   // print_graph(s,t,customer_nodes,product_nodes);
 
    ford_fulkerson(s, t);
-
-   // print_graph(s,t,customer_nodes,product_nodes);
 
    out_sol(argv[2], customer_nodes);
 
