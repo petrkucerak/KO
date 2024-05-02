@@ -28,8 +28,9 @@ vector<int> products;
 int main(int argc, char **argv)
 {
    if (argc < 3) {
-      cout << "Specify 2 arguments. Example: "
-           << "'./program <input path> <output_path>'\n";
+      fprintf(stderr, "Specify 2 arguments. Example: './program <input path> "
+                      "<output_path>'\n");
+      return 1;
    }
    load_file(argv[1]);
 
@@ -164,7 +165,7 @@ int main(int argc, char **argv)
    for (auto &b : new_s.outbound_edges) {
       if (b->flow != b->upper_bound) {
          write_output_inf(argv[2]);
-         cerr << "Infusible!\n";
+         printf("Infusible!\n");
          return 0;
       }
    }
@@ -223,13 +224,19 @@ void load_file(char *input_path)
    FILE *f = fopen(input_path, "r");
 
    if (f == nullptr) {
-      cout << "Could not open file with input [load_file]\n";
+      fprintf(stderr, "ERROR: Could not open file with input [load_file]\n");
       return;
    }
-   fscanf(f, "%i %i", &number_of_customers, &number_of_products);
+   if (fscanf(f, "%i %i", &number_of_customers, &number_of_products) != 2) {
+      fprintf(stderr, "ERROR: Can't load data parameters [load_file]\n");
+      return;
+   }
    for (int i = 0; i < number_of_customers; i++) {
       customer_t tmp;
-      fscanf(f, " %i %i", &tmp.lower_bound, &tmp.upper_bound);
+      if (fscanf(f, " %i %i", &tmp.lower_bound, &tmp.upper_bound) != 2) {
+         fprintf(stderr, "ERROR: Can't load data [load_file]\n");
+         return;
+      }
       char c;
       while ((c = fgetc(f)) != '\n') {
          int t;
