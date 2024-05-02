@@ -240,14 +240,20 @@ void load_file(char *input_path)
       char c;
       while ((c = fgetc(f)) != '\n') {
          int t;
-         fscanf(f, "%i", &t);
+         if (fscanf(f, "%i", &t) != 1) {
+            fprintf(stderr, "ERROR: Can't load product [load_file]\n");
+            return;
+         }
          tmp.bought_products.push_back(t - 1);
       }
       customers.push_back(tmp);
    }
    for (int i = 0; i < number_of_products; i++) {
       int tmp;
-      fscanf(f, "%i", &tmp);
+      if (fscanf(f, "%i", &tmp) != 1) {
+         fprintf(stderr, "ERROR: Can't load product [load_file]\n");
+         return;
+      }
       products.push_back(tmp);
    }
    fclose(f);
@@ -290,18 +296,6 @@ void write_output_inf(char *output_file)
    fclose(f);
 }
 
-void compute_balance(flow_node_t &n)
-{
-   int sum_inbound = 0, sum_outbound = 0;
-   for (const auto &e : n.inbound_edges) {
-      sum_inbound += e->lower_bound;
-   }
-   for (const auto &e : n.outbound_edges) {
-      sum_outbound += e->lower_bound;
-   }
-   n.balance = sum_inbound - sum_outbound;
-}
-
 void update_bounds(flow_node_t &n)
 {
    for (auto &e : n.inbound_edges) {
@@ -336,6 +330,18 @@ void connect_based_on_balance(flow_node_t &n, flow_node_t &new_s,
       n.outbound_edges.push_back(e);
       new_t.inbound_edges.push_back(e);
    }
+}
+
+void compute_balance(flow_node_t &n)
+{
+   int sum_inbound = 0, sum_outbound = 0;
+   for (const auto &e : n.inbound_edges) {
+      sum_inbound += e->lower_bound;
+   }
+   for (const auto &e : n.outbound_edges) {
+      sum_outbound += e->lower_bound;
+   }
+   n.balance = sum_inbound - sum_outbound;
 }
 
 int search(flow_node_t &s, flow_node_t &t)
@@ -385,24 +391,6 @@ int search(flow_node_t &s, flow_node_t &t)
    return 0;
 }
 
-void ford_fulkerson(flow_node_t &s, flow_node_t &t)
-{
-   flow_node_t *current_node = &t;
-   int flow_increase;
-   while ((flow_increase = search(s, t)) != 0) {
-      edge_t *curr_aug_path = current_node->augmenting_edge;
-      while (curr_aug_path != nullptr) {
-         if (curr_aug_path->natural) {
-            curr_aug_path->flow += flow_increase;
-            curr_aug_path = curr_aug_path->from->augmenting_edge;
-         } else {
-            curr_aug_path->flow -= flow_increase;
-            curr_aug_path = curr_aug_path->to->augmenting_edge;
-         }
-      }
-   }
-}
-
 void free_resources(flow_node_t &s, flow_node_t *customer_nodes,
                     flow_node_t *product_nodes)
 {
@@ -417,6 +405,24 @@ void free_resources(flow_node_t &s, flow_node_t *customer_nodes,
    for (int i = 0; i < number_of_products; i++) {
       for (auto &e : product_nodes[i].outbound_edges) {
          delete e;
+      }
+   }
+}
+
+void ford_fulkerson(flow_node_t &s, flow_node_t &t)
+{
+   flow_node_t *current_node = &t;
+   int flow_increase;
+   while ((flow_increase = search(s, t)) != 0) {
+      edge_t *curr_aug_path = current_node->augmenting_edge;
+      while (curr_aug_path != nullptr) {
+         if (curr_aug_path->natural) {
+            curr_aug_path->flow += flow_increase;
+            curr_aug_path = curr_aug_path->from->augmenting_edge;
+         } else {
+            curr_aug_path->flow -= flow_increase;
+            curr_aug_path = curr_aug_path->to->augmenting_edge;
+         }
       }
    }
 }
