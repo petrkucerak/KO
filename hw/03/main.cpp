@@ -16,6 +16,7 @@
 #include <queue>
 #include <stack>
 #include <vector>
+#include <inttypes.h>
 
 #include "main.h"
 
@@ -35,21 +36,21 @@ int main(int argc, char **argv)
    load_file(argv[1]);
 
    int term_names = -1;
-   flow_node_t s;
-   s.iteration = 0;
-   s.name = term_names--;
-   flow_node_t t;
-   t.iteration = 0;
-   t.name = term_names--;
+   flow_node_t start;
+   start.iteration = 0;
+   start.name = term_names--;
+   flow_node_t target;
+   target.iteration = 0;
+   target.name = term_names--;
    flow_node_t customer_nodes[number_of_customers];
    flow_node_t product_nodes[number_of_products];
 
-   flow_node_t s1;
-   s1.iteration = 0;
-   s1.name = term_names--;
-   flow_node_t t1;
-   t1.iteration = 0;
-   t1.name = term_names--;
+   flow_node_t start1;
+   start1.iteration = 0;
+   start1.name = term_names--;
+   flow_node_t target1;
+   target1.iteration = 0;
+   target1.name = term_names--;
 
    flow_node_t customer_nodes_1[number_of_customers];
    flow_node_t product_nodes_1[number_of_products];
@@ -60,9 +61,9 @@ int main(int argc, char **argv)
       e->lower_bound = customers[i].lower_bound;
       e->upper_bound = customers[i].upper_bound;
       e->flow = 0;
-      e->from = &s;
+      e->from = &start;
       e->to = &customer_nodes[i];
-      s.outbound_edges.push_back(e);
+      start.outbound_edges.push_back(e);
       customer_nodes[i].inbound_edges.push_back(e);
       customer_nodes[i].iteration = 0;
       customer_nodes[i].name = i;
@@ -70,9 +71,9 @@ int main(int argc, char **argv)
       e1->lower_bound = customers[i].lower_bound;
       e1->upper_bound = customers[i].upper_bound;
       e1->flow = 0;
-      e1->from = &s1;
+      e1->from = &start1;
       e1->to = &customer_nodes_1[i];
-      s1.outbound_edges.push_back(e1);
+      start1.outbound_edges.push_back(e1);
       customer_nodes_1[i].inbound_edges.push_back(e1);
       customer_nodes_1[i].iteration = 0;
       customer_nodes_1[i].name = i;
@@ -99,21 +100,21 @@ int main(int argc, char **argv)
    for (int i = 0; i < number_of_products; i++) {
       edge_t *e = new edge_t, *e1 = new edge_t;
       e->from = &product_nodes[i];
-      e->to = &t;
+      e->to = &target;
       e->lower_bound = products[i];
       e->upper_bound = INT32_MAX;
       e->flow = 0;
-      t.inbound_edges.push_back(e);
+      target.inbound_edges.push_back(e);
       product_nodes[i].outbound_edges.push_back(e);
       product_nodes[i].iteration = 0;
       product_nodes[i].name = i;
 
       e1->from = &product_nodes_1[i];
-      e1->to = &t1;
+      e1->to = &target1;
       e1->lower_bound = products[i];
       e1->upper_bound = INT32_MAX;
       e1->flow = 0;
-      t1.inbound_edges.push_back(e1);
+      target1.inbound_edges.push_back(e1);
       product_nodes_1[i].outbound_edges.push_back(e1);
       product_nodes_1[i].iteration = 0;
       product_nodes_1[i].name = i;
@@ -123,21 +124,21 @@ int main(int argc, char **argv)
    overflow_edge->lower_bound = 0;
    overflow_edge->flow = 0;
    overflow_edge->upper_bound = INT32_MAX;
-   overflow_edge->from = &t1;
-   overflow_edge->to = &s1;
-   t1.outbound_edges.push_back(overflow_edge);
-   s1.inbound_edges.push_back(overflow_edge);
+   overflow_edge->from = &target1;
+   overflow_edge->to = &start1;
+   target1.outbound_edges.push_back(overflow_edge);
+   start1.inbound_edges.push_back(overflow_edge);
 
-   compute_balance(s1);
-   compute_balance(t1);
+   compute_balance(start1);
+   compute_balance(target1);
    for (auto &i : customer_nodes_1) {
       compute_balance(i);
    }
    for (auto &i : product_nodes_1) {
       compute_balance(i);
    }
-   update_bounds(s1);
-   update_bounds(t1);
+   update_bounds(start1);
+   update_bounds(target1);
    for (auto &i : customer_nodes_1) {
       update_bounds(i);
    }
@@ -151,8 +152,8 @@ int main(int argc, char **argv)
    flow_node_t new_t;
    new_t.name = term_names--;
    new_t.iteration = 0;
-   connect_based_on_balance(s1, new_s, new_t);
-   connect_based_on_balance(t1, new_s, new_t);
+   connect_based_on_balance(start1, new_s, new_t);
+   connect_based_on_balance(target1, new_s, new_t);
    for (auto &i : customer_nodes_1) {
       connect_based_on_balance(i, new_s, new_t);
    }
@@ -171,12 +172,12 @@ int main(int argc, char **argv)
    }
 
    int count = 0;
-   for (auto &e : s1.outbound_edges) {
+   for (auto &e : start1.outbound_edges) {
       if (e->to->name == new_t.name) {
          continue;
       }
-      s.outbound_edges[count]->flow =
-          e->flow + s.outbound_edges[count]->lower_bound;
+      start.outbound_edges[count]->flow =
+          e->flow + start.outbound_edges[count]->lower_bound;
       count++;
    }
 
@@ -203,17 +204,17 @@ int main(int argc, char **argv)
       }
    }
 
-   ford_fulkerson(s, t);
+   ford_fulkerson(start, target);
 
    write_output_sol(argv[2], customer_nodes);
 
-   free_resources(s, customer_nodes, product_nodes);
+   free_resources(start, customer_nodes, product_nodes);
    free_resources(new_s, customer_nodes_1, product_nodes_1);
 
-   for (auto &e : t1.outbound_edges) {
+   for (auto &e : target1.outbound_edges) {
       delete e;
    }
-   for (auto &e : s1.outbound_edges) {
+   for (auto &e : start1.outbound_edges) {
       delete e;
    }
    return 0;
