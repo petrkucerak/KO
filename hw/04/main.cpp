@@ -97,11 +97,11 @@ bool bratleyAlgorithm(vector<Task> &tasks, vector<int> &order, int start_time,
       skip_parents = true;
    }
 
-   // Peter's smart heuristic
-   if (history_sum < best_release_time - start_time &&
-       start_time + peters_magic >= best_time) {
-      return skip_parents;
-   }
+   // // Peter's smart heuristic
+   // if (history_sum < best_release_time - start_time &&
+   //     start_time + peters_magic >= best_time) {
+   //    return skip_parents;
+   // }
 
    bool is_best_tmp = false;
    for (int i = depth; i < tasks.size(); ++i) {
