@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 import sys
 
-
 class Schedule:
     def __init__(self):
         self.solution = []
