@@ -15,9 +15,9 @@ typedef struct {
 } edge_t;
 
 void print_graph(vector<vector<edge_t>> &graph);
-bool is_cyclic(vector<edge_t> &graph, uint32_t &vertices_count);
-bool is_cyclic_util(uint32_t node, vector<bool> &visited,
-                    vector<bool> &rec_stack, vector<edge_t> &graph);
+bool is_cyclic(vector<vector<edge_t>> &graph, uint32_t &vertices_count);
+bool is_cyclic_util(uint32_t vertex, vector<bool> &visited,
+                    vector<bool> &rec_stack, vector<vector<edge_t>> &graph);
 
 int main(int argc, char const *argv[])
 {
@@ -69,7 +69,10 @@ int main(int argc, char const *argv[])
       exit(EXIT_FAILURE);
    }
 
-   // print_graph(graph);
+   if (is_cyclic(graph, vertices_count))
+      cout << "Is cyclic" << endl;
+   else
+      cout << "Is not cyclic" << endl;
 
    /* Write solution */
    FILE *output_p;
@@ -97,15 +100,13 @@ void print_graph(vector<vector<edge_t>> &graph)
    }
 }
 
-bool is_cyclic(vector<edge_t> &graph, uint32_t &vertices_count)
+bool is_cyclic(vector<vector<edge_t>> &graph, uint32_t &vertices_count)
 {
-   // Mark all the vertices as not visited
-   // and not part of recursion stack
+   // Mark all the vertices as not visited and not part of recursion stack
    vector<bool> visited(vertices_count, false);
    vector<bool> rec_stack(vertices_count, false);
 
-   // Call the recursive helper function
-   // to detect cycle in different DFS trees
+   // Call the recursive helper function to detect cycle in different DFS trees
    for (uint32_t i = 0; i < vertices_count; ++i) {
       if (!visited[i] && is_cyclic_util(i, visited, rec_stack, graph))
          return true;
@@ -113,13 +114,23 @@ bool is_cyclic(vector<edge_t> &graph, uint32_t &vertices_count)
    return false;
 }
 
-bool is_cyclic_util(uint32_t node, vector<bool> &visited,
-                    vector<bool> &rec_stack, vector<edge_t> &graph)
+bool is_cyclic_util(uint32_t vertex, vector<bool> &visited,
+                    vector<bool> &rec_stack, vector<vector<edge_t>> &graph)
 {
-   if (visited[node] == false) {
-      // Mark the current node as visited
-      // and part of recursion stack
-      visited[node] = true;
-      rec_stack[node] = true;
+   if (visited[vertex] == false) {
+      // Mark the current vertex as visited and part of recursion stack
+      visited[vertex] = true;
+      rec_stack[vertex] = true;
+      // Recur for all the vertices adjacent to this vertex
+      for (uint32_t i = 0; i < graph[vertex].size(); ++i) {
+         if (!visited[graph[vertex][i].to] &&
+             is_cyclic_util(graph[vertex][i].to, visited, rec_stack, graph))
+            return true;
+         else if (rec_stack[graph[vertex][i].to])
+            return true;
+      }
    }
+   // Remove the vertex from recursion stack
+   rec_stack[vertex] = false;
+   return false;
 }
