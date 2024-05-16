@@ -26,6 +26,8 @@ $
 (V, E \setminus D) \text{ je acyklický graf.}
 $
 
+![alt text](assets/image-2.png)
+
 ## 3. Pravidla
 
 Pokud se rozhodnete zvolit tento konkurs jako svůj semestrální projekt, očekává se od vás, že implementujete správný řešitel pro "Chytré město s ne příliš chytrou kanalizací." Implementace bude odeslána na BRUTE (https://cw.felk.cvut.cz/brute/), kde bude automaticky vyhodnocena (počet odeslání není omezen). Hodnocení je kombinací schopnosti najít dobrá řešení a dosaženého pořadí relativně k ostatním studentům (vzhledem k cílové funkci). Proto můžete získat malé množství bodů, i když váš řešitel není ve srovnání s ostatními studenty velmi efektivní.
