@@ -12,20 +12,24 @@ using namespace std;
 typedef struct {
    uint32_t to;
    uint32_t cost;
+} target_t;
+
+typedef struct {
+   uint32_t from;
+   uint32_t to;
 } edge_t;
 
-void print_graph(vector<vector<edge_t>> &graph);
+void print_graph(vector<vector<target_t>> &graph);
 
 /**
  * @brief Main function if graph is cycle, return true. Algorithm uses DFS and
  * is implemented by: https://www.geeksforgeeks.org/detect-cycle-in-a-graph/.
  *
  * @param graph
- * @param vertices_count
  * @return true
  * @return false
  */
-bool is_cyclic(vector<vector<edge_t>> &graph, uint32_t &vertices_count);
+bool is_cyclic(vector<vector<target_t>> &graph);
 
 /**
  * @brief Util function to find cycle in graph.
@@ -38,7 +42,11 @@ bool is_cyclic(vector<vector<edge_t>> &graph, uint32_t &vertices_count);
  * @return false
  */
 bool is_cyclic_util(uint32_t vertex, vector<bool> &visited,
-                    vector<bool> &rec_stack, vector<vector<edge_t>> &graph);
+                    vector<bool> &rec_stack, vector<vector<target_t>> &graph);
+
+uint32_t get_best_solution(vector<vector<target_t>> &graph,
+                           vector<edge_t> &removed_edges, uint32_t best_cost,
+                           uint32_t depth);
 
 int main(int argc, char const *argv[])
 {
@@ -64,7 +72,7 @@ int main(int argc, char const *argv[])
       exit(EXIT_FAILURE);
    }
    /* Load graph */
-   vector<vector<edge_t>> graph(DEFAULT_VERTICES_COUNT);
+   vector<vector<target_t>> graph(DEFAULT_VERTICES_COUNT);
    uint32_t vertices_count = 0;
    for (uint32_t i = 0; i < edges_count; ++i) {
       uint32_t from, to, cost;
@@ -90,17 +98,31 @@ int main(int argc, char const *argv[])
       exit(EXIT_FAILURE);
    }
 
-   if (is_cyclic(graph, vertices_count))
-      cout << "Is cyclic" << endl;
-   else
-      cout << "Is not cyclic" << endl;
+   /* Iterate on all edges */
+   uint32_t removed_cost = UINT32_MAX;
+   vector<edge_t> removed_edges;
+   removed_cost = get_best_solution(graph, removed_edges, removed_cost, 0);
+   if (!removed_cost) {
+      perror("Map does not contains Penrose stairs!");
+      exit(EXIT_FAILURE);
+   }
+
+   /* Print the best solution */
+   cout << "Objective " << removed_cost << endl;
+   for (uint32_t line = 0; line < removed_edges.size(); ++line) {
+      printf("%d %d\n", removed_edges[line].from + 1,
+             removed_edges[line].to + 1);
+   }
 
    /* Write solution */
    FILE *output_p;
    output_p = fopen(OUTPUT_PATH, "w+");
 
-   uint32_t remove_weight = 0;
-   fprintf(output_p, "%d\n", remove_weight);
+   fprintf(output_p, "%d\n", removed_cost);
+   for (uint32_t line = 0; line < removed_edges.size(); ++line) {
+      fprintf(output_p, "%d %d\n", removed_edges[line].from + 1,
+              removed_edges[line].to + 1);
+   }
 
    /* Close output file */
    if (fclose(output_p) != 0) {
@@ -110,10 +132,11 @@ int main(int argc, char const *argv[])
    return 0;
 }
 
-void print_graph(vector<vector<edge_t>> &graph)
+void print_graph(vector<vector<target_t>> &graph)
 {
+   cout << " ------------------- " << endl;
    for (uint32_t i = 0; i < graph.size(); ++i) {
-      cout << endl << "VERTEX: " << i << endl;
+      cout << "VERTEX: " << i << endl;
       for (uint32_t j = 0; j < graph[i].size(); ++j) {
          cout << "target: " << graph[i][j].to << ", cost " << graph[i][j].cost
               << endl;
@@ -121,14 +144,14 @@ void print_graph(vector<vector<edge_t>> &graph)
    }
 }
 
-bool is_cyclic(vector<vector<edge_t>> &graph, uint32_t &vertices_count)
+bool is_cyclic(vector<vector<target_t>> &graph)
 {
    // Mark all the vertices as not visited and not part of recursion stack
-   vector<bool> visited(vertices_count, false);
-   vector<bool> rec_stack(vertices_count, false);
+   vector<bool> visited(graph.size(), false);
+   vector<bool> rec_stack(graph.size(), false);
 
    // Call the recursive helper function to detect cycle in different DFS trees
-   for (uint32_t i = 0; i < vertices_count; ++i) {
+   for (uint32_t i = 0; i < graph.size(); ++i) {
       if (!visited[i] && is_cyclic_util(i, visited, rec_stack, graph))
          return true;
    }
@@ -136,7 +159,7 @@ bool is_cyclic(vector<vector<edge_t>> &graph, uint32_t &vertices_count)
 }
 
 bool is_cyclic_util(uint32_t vertex, vector<bool> &visited,
-                    vector<bool> &rec_stack, vector<vector<edge_t>> &graph)
+                    vector<bool> &rec_stack, vector<vector<target_t>> &graph)
 {
    if (visited[vertex] == false) {
       // Mark the current vertex as visited and part of recursion stack
@@ -154,4 +177,46 @@ bool is_cyclic_util(uint32_t vertex, vector<bool> &visited,
    // Remove the vertex from recursion stack
    rec_stack[vertex] = false;
    return false;
+}
+
+uint32_t get_best_solution(vector<vector<target_t>> &graph,
+                           vector<edge_t> &removed_edges, uint32_t best_cost,
+                           uint32_t depth)
+{
+   for (uint32_t vertex = 0; vertex < graph.size(); ++vertex) {
+      for (uint32_t edge = 0; edge < graph[vertex].size(); ++edge) {
+
+         /* If the edge cost is higher then the best found cost, skip it */
+         if (graph[vertex][edge].cost >= best_cost)
+            continue;
+
+         /* Remove edge */
+         target_t tmp;
+         tmp.cost = graph[vertex][edge].cost;
+         tmp.to = graph[vertex][edge].to;
+         graph[vertex].erase(graph[vertex].begin() + edge);
+
+         uint32_t cost = tmp.cost;
+         /* Check cycle */
+         if (is_cyclic(graph))
+            cost =
+                +get_best_solution(graph, removed_edges, best_cost, depth + 1);
+
+         if (cost < best_cost) {
+            /* Update new cost */
+            best_cost = cost;
+
+            /* Remove last added edge */
+            if (removed_edges.size() > depth)
+               removed_edges.pop_back();
+
+            /* Push new edge */
+            removed_edges.push_back({vertex, tmp.to});
+         }
+
+         /* Add remove edge */
+         graph[vertex].insert(graph[vertex].begin() + edge, tmp);
+      }
+   }
+   return best_cost;
 }
