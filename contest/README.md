@@ -1,55 +1,121 @@
-# Problematika kanalizace
+# Semestrální projekt Cocontest: Chytré město s ne příliš chytrou kanalizací
 
-## Motivace
+## 1. Motivační příklad
 
-Please translate this text to Czech:
+V nejmenovaném městě ve středovýchodní části Evropy byla modernizována kanalizační síť. Aby se zvýšil tok pobídek z Evropského parlamentu, městská rada chtěla, aby se město stalo „chytrým“—každá kanalizační trubka nyní obsahuje různé senzory a kamery. Vše lze monitorovat prostřednictvím webového rozhraní. Zatímco obrovské výhody takových funkcí byly zanedbatelné, celkové náklady na systém byly ve skutečnosti astronomické. Proto byly během realizace vynechány jiné, mnohem méně důležité neesenciální funkce, jako je systém čištění kanalizace.
 
-In an unnamed city in the mid-east part of Europe, the sewer system was modernized. To increase
-the flow of incentives from the EU parliament, the city council wanted the city to become ”Smart”
-— every sewer tube now contains various sensors and cameras. Everything can be monitored
-through the web interface. While the immense benefits of such features were negligible, the total
-cost of the system was, in fact, astronomical. Thus, other much less important non-essential
-features like the sewer cleaning system were omitted during the realization.
-When the time came to do the first cleaning, the ”volunteers” group was selected from the
-nearby fire department to go into the sewer and clean it by pumping water to the tubes manually.
-Unfortunately for the firemen, a prominent extravagant architect *Penrose* was hired for the project.
-His works were famous for over-complicated and very often physically impossible constructions.
-Using his own extension of Euclidean geometry, this unsung genius designed a system of tubes
-defying even the laws of physics. Driven by striving for the impossible, he introduced the concept
-of *Penrose stairs* into the sewer system. In the sewer system made of tubes with a certain slope,
-the water could actually return in a cycle back to the original place, which would be otherwise
-impossible. Although this design seemed visionary at first glance, it turned out it brings some
-complications to the firemen. The water — now enriched by the sewer contents — was heading
-their way from a different tube. Thus, the poor firemen were mercilessly swept by the tidal wave
-of sewer contents.
-The remaining firemen are now refusing to enter the sewers until these life-threatening cycles are
-removed. However, the city budget is already over-stretched - other state-of-the-art revolutionary
-projects of the same caliber are being constructed around the city. Luckily, scribbling of the sewer
-design was recovered and can be analyzed.
-To block a specific tube in the system (i.e., removing some directed cycle in which the tube
-is present), one needs to dig a hole above the tube to enter it with the necessary equipment.
-However, this is not equally expensive for every tube in the system. If the tube lies under a busy
-street or a building, it can be much more costly to dig there than digging above a tube placed
-under a park (if Greenpeace members conduct no obstructions). On top of that, the tube might
-be a part of more than just one cycle, so finding an optimal way to minimize all digging costs is
-a very complex problem.
+Když nastal čas na první čištění, skupina „dobrovolníků“ byla vybrána z nedalekého hasičského sboru, aby šli do kanalizace a čistili ji ručním čerpáním vody do trubek. Bohužel pro hasiče byl pro projekt najat prominentní extravagantní architekt Penrose. Jeho díla byla proslulá příliš složitými a velmi často fyzicky nemožnými konstrukcemi. S využitím svého vlastního rozšíření euklidovské geometrie tento neoznačený génius navrhl systém trubek, který popíral i zákony fyziky. Hnán snahou o nemožné zavedl koncept Penrosových schodů do kanalizačního systému. V kanalizačním systému tvořeném trubkami s určitým sklonem se voda mohla skutečně vrátit v cyklu zpět na původní místo, což by bylo jinak nemožné. Ačkoli se tento design na první pohled zdál vizionářský, ukázalo se, že přináší hasičům určité komplikace. Voda—nyní obohacená o obsah kanalizace—se k nim dostávala z jiné trubky. Tím byli chudáci hasiči nemilosrdně smeteni přívalovou vlnou obsahu kanalizace.
 
-As city council members refuse to cut their salaries to reallocate the budget, the council asked
-the nearby university department to organize some contest, which would quietly, under the radar,
-solve the entangled sewer problem. Their plan is to abuse poor students to develop a good solution
-to the problem. In return, students will be fairly rewarded with a valuable experience and the
-sense of accomplishment obtained by solving such a complex problem, which is all the reward a
-student actually needs. In addition, the name of the author of the best solution will be forever
-engraved on the slides of Combinatorial Optimization and in the sewers, thus granting the author
-further bragging rights and earn the respect of their peers.
+Zbylí hasiči nyní odmítají vstoupit do kanalizace, dokud nebudou tyto životu nebezpečné cykly odstraněny. Městský rozpočet je však již přetížen—po celém městě se staví další stejně revoluční projekty. Naštěstí byly nalezeny nákresy kanalizačního designu, které lze analyzovat.
 
-### Czech version
+Aby se zablokovala konkrétní trubka v systému (tj. odstranění nějakého řízeného cyklu, ve kterém je trubka přítomna), je potřeba nad trubkou vykopat díru, aby bylo možné vstoupit s potřebným vybavením. To však není stejně nákladné pro každou trubku v systému. Pokud se trubka nachází pod rušnou ulicí nebo budovou, může být mnohem nákladnější tam kopat než kopat nad trubkou umístěnou pod parkem (pokud členové Greenpeace nekladou žádné překážky). Navíc může být trubka součástí více než jednoho cyklu, takže nalezení optimálního způsobu minimalizace všech nákladů na kopání je velmi složitý problém.
 
-V nejmenovaném městě ve střední části Evropy byl modernizován kanalizační systém. Aby se zvýšil tok pobídek z Evropského parlamentu, chtěl městský zastupitelstvo, aby se město stalo „chytrým“ - každá kanalizační trubka nyní obsahuje různé senzory a kamery. Vše lze monitorovat prostřednictvím webového rozhraní. Zatímco obrovské výhody takových funkcí byly zanedbatelné, celkové náklady na systém byly ve skutečnosti astronomické. Proto byly během realizace vynechány další mnohem méně důležité nezbytné funkce, jako je čištění kanalizace.
-Když přišel čas udělat první čištění, byla z nedalekého hasičského oddělení vybrána skupina „dobrovolníků“, aby šla do kanalizace a čistila ji ručně pomocí čerpání vody do trubek. Bohužel pro hasiče byl najat prominentní extravagantní architekt Penrose pro tento projekt. Jeho díla byla proslulá překomplikovanými a velmi často fyzicky nemožnými konstrukcemi. Použitím svého vlastního rozšíření euklidovské geometrie tento nepříznivý génius navrhl systém trubek, který se vzepřel dokonce i fyzikálním zákonům. Poháněn snahou o nemožné představil koncept Penroseových schodů do kanalizačního systému. V kanalizačním systému složeném z trubek s určitým sklonem mohla voda skutečně putovat v cyklu zpět na původní místo, což by jinak bylo nemožné. I když se tento návrh zdál vizionářský na první pohled, ukázalo se, že přináší některé komplikace pro hasiče. Voda - nyní obohacená obsahem kanalizace - směřovala jejich směrem z jiné trubky. Takže chudí hasiči byli nelítostně smetení přílivem obsahu kanalizace.
+## 2. Formální zadání problému
 
-Zbývající hasiči nyní odmítají vstoupit do kanalizace, dokud nebudou tyto ohrožující životní cykly odstraněny. Nicméně rozpočet města je již přetažený - kolem města jsou již stavěny jiné revoluční projekty stejného kalibru. Naštěstí bylo nalezeno náčrtník kanalizačního designu a může být analyzován.
+Je vám dáno řízený graf $G = (V, E)$ s množinou vrcholů $V = \{1, 2, \ldots, n\}$ a řízenými hranami $E$. Každá hrana $e \in E$, $e = (i, j)$, je spojena s nákladem $c_e \in \mathbb{Z}^+$. Cílem je najít množinu hran $D$ s minimálním součtem váhy hran, přičemž množina $E \setminus D$ neobsahuje žádné cykly. Výsledný graf nemusí být propojený, ale přemýšlejte o tom, co by to znamenalo pro optimálnost řešení (a chudé obyvatele města používající kanalizační systém k splachování odpadu).
 
-Chcete-li zablokovat konkrétní trubku v systému (tj. Odstranit nějaký orientovaný cyklus, ve kterém je trubka přítomna), je nutné vykopat díru nad trubkou, aby se do ní dostala potřebná zařízení. Nicméně to není pro každou trubku v systému stejně nákladné. Pokud leží trubka pod rušnou ulicí nebo budovou, může být mnohem dražší kopat tam než nad trubkou umístěnou pod parkem (pokud členové Greenpeace neprovádějí žádné překážky). Navíc může být trubka součástí více než jednoho cyklu, takže nalezení optimálního způsobu minimalizace všech nákladů na kopání je velmi složitý problém.
+Formální zadání problému lze tedy popsat takto:
 
-Protože členové městského zastupitelstva odmítají snížit své platy pro přerozdělení rozpočtu, požádalo zastupitelstvo nedaleké univerzitní oddělení, aby zorganizovalo soutěž, která by tichým způsobem řešila zamotaný problém kanalizace. Jejich plán spočívá v tom, že zneužijí chudé studenty k vypracování dobrého řešení problému. Studenti budou za to spravedlivě odměněni cennými zkušenostmi a pocitem úspěchu získaným řešením tak složitého problému, což je vlastně jediná odměna, kterou student potřebuje. Kromě toho bude jméno autora nejlepšího řešení navždy vyryto na snímcích Kombinatorické optimalizace a v kanalizaci, čímž autor získá další právo na vychloubání a získá si respekt svých vrstevníků.
+$
+\min*{D \subseteq E} \sum*{e \in D} c_e
+$
+
+za podmínky:
+
+$
+(V, E \setminus D) \text{ je acyklický graf.}
+$
+
+## 3. Pravidla
+
+Pokud se rozhodnete zvolit tento konkurs jako svůj semestrální projekt, očekává se od vás, že implementujete správný řešitel pro "Chytré město s ne příliš chytrou kanalizací." Implementace bude odeslána na BRUTE (https://cw.felk.cvut.cz/brute/), kde bude automaticky vyhodnocena (počet odeslání není omezen). Hodnocení je kombinací schopnosti najít dobrá řešení a dosaženého pořadí relativně k ostatním studentům (vzhledem k cílové funkci). Proto můžete získat malé množství bodů, i když váš řešitel není ve srovnání s ostatními studenty velmi efektivní.
+
+Na BRUTE najdete 3 úkoly související s konkursem. Každý úkol má specifické instance, pravidla a hodnocení. Konkurs je rozdělen do různých úkolů, aby se zabránilo opětovnému vyhodnocování instancí (což je časově náročné) a aby bylo možné implementovat specifického řešitele pro každý úkol.
+
+1. **SP CC O**: Musíte implementovat přesný MILP řešitel pro problém. Pokud váš řešitel optimálně vyřeší všechny instance v tomto úkolu, získáte za tento úkol 3 body. Pokud řešitel vrátí suboptimální řešení pro jakoukoli instanci v tomto úkolu, vyhodnocení vašeho řešitele je zastaveno a získáte 0 bodů za tento úkol.
+
+2. **SP CC T**: Cílem je najít nejlepší možné proveditelné řešení v rámci stanoveného časového limitu, tj. optimální řešení nejsou vyžadována, a jste povzbuzováni k implementaci chytrých heuristik řešících tyto instance. Pro každou instanci v tomto úkolu získáte nějakou část bodu, pokud náklady vašeho řešení nejsou horší než náš práh (maximálně 4 body).
+
+3. **SP CC R**: Podobně jako v SP CC T, v tomto úkolu se také zajímáme o nalezení nejlepšího možného proveditelného řešení v rámci stanoveného časového limitu. Hodnocení vašeho řešitele však bude záviset na tom, jak dobrý je váš řešitel ve srovnání s řešiteli ostatních studentů, tj. počet získaných bodů bude záviset na vašem pořadí (maximálně 4 body).
+
+Platí také některá obecná pravidla konkursu:
+
+1. Používání jednorázových specifických řešitelů problémů je zakázáno (tj. MILP řešitel je povolen, ale cizí kód pro řešení "Chytré město s ne příliš chytrou kanalizací" jako problém není). Použití MILP řešitele pro prahovou a hodnotící část úkolu je zakázáno.
+
+2. Každý účastník je povinen napsat svůj vlastní kód. Sdílení nápadů a diskuse o problému jsou však podporovány.
+
+## 4. Formát vstupu a výstupu
+
+V SP CC O bude váš řešitel volán jako:
+
+```
+$ ./your-solver PATH_INPUT_FILE PATH_OUTPUT_FILE
+```
+
+zatímco v SP CC T a SP CC R zahrnujeme časový limit:
+
+```
+$ ./your-solver PATH_INPUT_FILE PATH_OUTPUT_FILE TIME_LIMIT
+```
+
+- **PATH_INPUT_FILE** a **PATH_OUTPUT_FILE**: podobně jako v domácích úkolech, tyto parametry představují cestu ke vstupním a výstupním souborům (viz níže pro popis formátů souborů).
+
+- **TIME_LIMIT**: číslo s plovoucí desetinnou čárkou představující časový limit v sekundách, který je dán vašemu řešiteli. Váš řešitel bude po dosažení časového limitu ukončen a
+
+získáte 0 bodů. Výstup vašeho řešitele je tedy považován pouze tehdy, pokud váš program ukončí s kódem stavu 0 před vypršením časového limitu.
+
+Vstupní soubor má následující formu (používáme jednu mezeru jako oddělovač mezi hodnotami na jednom řádku):
+
+```
+|E|
+i1 j1 c1
+...
+...
+...
+i|E| j|E| c|E|
+```
+
+Výstupní soubor má následující formát:
+
+```
+obj
+i1 j1
+...
+...
+i|D| j|D|
+```
+
+kde **obj** je celkový náklad všech odstraněných hran a uvedené hrany jsou ze sady **D** odstraněných hran. Můžete předpokládat, že všechna čísla ve vstupním a výstupním souboru jsou celá čísla.
+
+### Příklad 1
+
+Tento příklad odpovídá motivačnímu příkladu.
+
+**Vstup:**
+
+```
+9
+1 2 2
+1 3 5
+2 4 4
+3 1 3
+3 4 3
+4 1 3
+4 2 7
+4 5 10
+5 1 1
+```
+
+**Výstup:**
+
+```
+9
+1 3
+2 4
+```
+
+## 5. Obrázky menších veřejných instancí
+
+Abychom vám dále pomohli vizualizovat problém, jsou vám poskytnuty tyto grafy představující první 4 veřejné instance (bez vah). Pokud mezi dvěma vrcholy existuje obousměrná hrana, šipka je obousměrná. Kvůli přehlednosti jsou váhy v obrázcích vynechány.
+
+![alt text](assets/image.png)![alt text](assets/image-1.png)
