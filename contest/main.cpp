@@ -98,6 +98,11 @@ int main(int argc, char const *argv[])
       exit(EXIT_FAILURE);
    }
 
+   if (is_cyclic(graph))
+      cout << "The graph is cyclic!" << endl;
+   else
+      cout << "The graph is not cyclic!" << endl;
+
    /* Iterate on all edges */
    uint32_t removed_cost = UINT32_MAX;
    vector<edge_t> removed_edges;
