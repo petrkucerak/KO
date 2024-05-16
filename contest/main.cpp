@@ -69,7 +69,7 @@ int main(int argc, char const *argv[])
       exit(EXIT_FAILURE);
    }
 
-   print_graph(graph);
+   // print_graph(graph);
 
    /* Write solution */
    FILE *output_p;
@@ -89,9 +89,10 @@ int main(int argc, char const *argv[])
 void print_graph(vector<vector<edge_t>> &graph)
 {
    for (uint32_t i = 0; i < graph.size(); ++i) {
-      cout << endl << "VERTEX: " << i  << endl;
+      cout << endl << "VERTEX: " << i << endl;
       for (uint32_t j = 0; j < graph[i].size(); ++j) {
-         cout << "target: " << graph[i][j].to << ", cost " << graph[i][j].cost << endl;
+         cout << "target: " << graph[i][j].to << ", cost " << graph[i][j].cost
+              << endl;
       }
    }
 }
