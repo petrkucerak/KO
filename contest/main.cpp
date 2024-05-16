@@ -15,7 +15,28 @@ typedef struct {
 } edge_t;
 
 void print_graph(vector<vector<edge_t>> &graph);
+
+/**
+ * @brief Main function if graph is cycle, return true. Algorithm uses DFS and
+ * is implemented by: https://www.geeksforgeeks.org/detect-cycle-in-a-graph/.
+ *
+ * @param graph
+ * @param vertices_count
+ * @return true
+ * @return false
+ */
 bool is_cyclic(vector<vector<edge_t>> &graph, uint32_t &vertices_count);
+
+/**
+ * @brief Util function to find cycle in graph.
+ *
+ * @param vertex
+ * @param visited
+ * @param rec_stack
+ * @param graph
+ * @return true
+ * @return false
+ */
 bool is_cyclic_util(uint32_t vertex, vector<bool> &visited,
                     vector<bool> &rec_stack, vector<vector<edge_t>> &graph);
 
