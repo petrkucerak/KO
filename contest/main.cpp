@@ -5,16 +5,16 @@
 
 #define INPUT_PATH argv[1]
 #define OUTPUT_PATH argv[2]
+#define DEFAULT_VERTICES_COUNT 10
 
 using namespace std;
 
 typedef struct {
    uint32_t to;
-   uint32_t from;
    uint32_t cost;
 } edge_t;
 
-void print_graph(vector<edge_t> &graph);
+void print_graph(vector<vector<edge_t>> &graph);
 bool is_cyclic(vector<edge_t> &graph, uint32_t &vertices_count);
 bool is_cyclic_util(uint32_t node, vector<bool> &visited,
                     vector<bool> &rec_stack, vector<edge_t> &graph);
@@ -43,19 +43,26 @@ int main(int argc, char const *argv[])
       exit(EXIT_FAILURE);
    }
    /* Load graph */
+   vector<vector<edge_t>> graph(DEFAULT_VERTICES_COUNT);
    uint32_t vertices_count = 0;
-   vector<edge_t> graph(edges_count);
    for (uint32_t i = 0; i < edges_count; ++i) {
-      if (fscanf(input_p, "%d %d %d", &graph[i].from, &graph[i].to,
-                 &graph[i].cost) != 3) {
+      uint32_t from, to, cost;
+      if (fscanf(input_p, "%d %d %d", &from, &to, &cost) != 3) {
          perror("Can't correctly load graph edges!");
          exit(EXIT_FAILURE);
       }
-      if (graph[i].from > vertices_count)
-         vertices_count = graph[i].from;
-      if (graph[i].to > vertices_count)
-         vertices_count = graph[i].to;
+      /* Get count of vertices */
+      if (from > vertices_count)
+         vertices_count = from;
+      if (to > vertices_count)
+         vertices_count = to;
+      /* Resize graph is it necessary */
+      if (graph.size() < vertices_count)
+         graph.resize(graph.size() * 2);
+      /* Push edge */
+      graph[from - 1].push_back({to - 1, cost});
    }
+   graph.resize(vertices_count);
    /* Close input file */
    if (fclose(input_p) != 0) {
       perror("Can't close the input file!");
@@ -79,10 +86,13 @@ int main(int argc, char const *argv[])
    return 0;
 }
 
-void print_graph(vector<edge_t> &graph)
+void print_graph(vector<vector<edge_t>> &graph)
 {
-   for (auto edge : graph) {
-      printf("%d %d %d\n", edge.from, edge.to, edge.cost);
+   for (uint32_t i = 0; i < graph.size(); ++i) {
+      cout << endl << "VERTEX: " << i  << endl;
+      for (uint32_t j = 0; j < graph[i].size(); ++j) {
+         cout << "target: " << graph[i][j].to << ", cost " << graph[i][j].cost << endl;
+      }
    }
 }
 
