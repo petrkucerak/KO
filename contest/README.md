@@ -12,7 +12,7 @@ Aby se zablokovala konkrétní trubka v systému (tj. odstranění nějakého ř
 
 ## 2. Formální zadání problému
 
-Je vám dáno řízený graf $G = (V, E)$ s množinou vrcholů $V = \{1, 2, \ldots, n\}$ a řízenými hranami $E$. Každá hrana $e \in E$, $e = (i, j)$, je spojena s nákladem $c_e \in \mathbb{Z}^+$. Cílem je najít množinu hran $D$ s minimálním součtem váhy hran, přičemž množina $E \setminus D$ neobsahuje žádné cykly. Výsledný graf nemusí být propojený, ale přemýšlejte o tom, co by to znamenalo pro optimálnost řešení (a chudé obyvatele města používající kanalizační systém k splachování odpadu).
+Je vám dáno orientovany graf $G = (V, E)$ s množinou vrcholů $V = \{1, 2, \ldots, n\}$ a řízeorientovanymi hranami $E$. Každá hrana $e \in E$, $e = (i, j)$, je spojena s nákladem $c_e \in \mathbb{Z}^+$. Cílem je najít množinu hran $D$ s minimálním součtem váhy hran, přičemž množina $E \setminus D$ neobsahuje žádné cykly. Výsledný graf nemusí být propojený, ale přemýšlejte o tom, co by to znamenalo pro optimálnost řešení (a chudé obyvatele města používající kanalizační systém k splachování odpadu).
 
 Formální zadání problému lze tedy popsat takto:
 
