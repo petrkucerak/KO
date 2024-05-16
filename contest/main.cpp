@@ -14,12 +14,10 @@ typedef struct {
    uint32_t cost;
 } edge_t;
 
-void print_graph(vector<edge_t> &graph)
-{
-   for (auto edge : graph) {
-      printf("%d %d %d\n", edge.from, edge.to, edge.cost);
-   }
-}
+void print_graph(vector<edge_t> &graph);
+bool is_cyclic(vector<edge_t> &graph, uint32_t &vertices_count);
+bool is_cyclic_util(uint32_t node, vector<bool> &visited,
+                    vector<bool> &rec_stack, vector<edge_t> &graph);
 
 int main(int argc, char const *argv[])
 {
@@ -45,6 +43,7 @@ int main(int argc, char const *argv[])
       exit(EXIT_FAILURE);
    }
    /* Load graph */
+   uint32_t vertices_count = 0;
    vector<edge_t> graph(edges_count);
    for (uint32_t i = 0; i < edges_count; ++i) {
       if (fscanf(input_p, "%d %d %d", &graph[i].from, &graph[i].to,
@@ -52,6 +51,10 @@ int main(int argc, char const *argv[])
          perror("Can't correctly load graph edges!");
          exit(EXIT_FAILURE);
       }
+      if (graph[i].from > vertices_count)
+         vertices_count = graph[i].from;
+      if (graph[i].to > vertices_count)
+         vertices_count = graph[i].to;
    }
    /* Close input file */
    if (fclose(input_p) != 0) {
@@ -74,4 +77,38 @@ int main(int argc, char const *argv[])
       exit(EXIT_FAILURE);
    }
    return 0;
+}
+
+void print_graph(vector<edge_t> &graph)
+{
+   for (auto edge : graph) {
+      printf("%d %d %d\n", edge.from, edge.to, edge.cost);
+   }
+}
+
+bool is_cyclic(vector<edge_t> &graph, uint32_t &vertices_count)
+{
+   // Mark all the vertices as not visited
+   // and not part of recursion stack
+   vector<bool> visited(vertices_count, false);
+   vector<bool> rec_stack(vertices_count, false);
+
+   // Call the recursive helper function
+   // to detect cycle in different DFS trees
+   for (uint32_t i = 0; i < vertices_count; ++i) {
+      if (!visited[i] && is_cyclic_util(i, visited, rec_stack, graph))
+         return true;
+   }
+   return false;
+}
+
+bool is_cyclic_util(uint32_t node, vector<bool> &visited,
+                    vector<bool> &rec_stack, vector<edge_t> &graph)
+{
+   if (visited[node] == false) {
+      // Mark the current node as visited
+      // and part of recursion stack
+      visited[node] = true;
+      rec_stack[node] = true;
+   }
 }
