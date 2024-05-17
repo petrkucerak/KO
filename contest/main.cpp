@@ -103,6 +103,8 @@ int main(int argc, char const *argv[])
    // else
    //    cout << "The graph is not cyclic!" << endl;
 
+   // print_graph(graph);
+
    /* Iterate on all edges */
    uint32_t removed_cost = UINT32_MAX;
    vector<edge_t> removed_edges;
@@ -204,11 +206,10 @@ uint32_t get_best_solution(vector<vector<target_t>> &graph,
          uint32_t cost = tmp.cost;
          /* Check cycle */
          if (is_cyclic(graph))
-            cost =
-                +get_best_solution(graph, removed_edges, best_cost, depth + 1);
+            cost +=
+                get_best_solution(graph, removed_edges, best_cost, depth + 1);
 
          if (cost < best_cost) {
-            /* Update new cost */
             best_cost = cost;
 
             /* Remove last added edge */
