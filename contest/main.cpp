@@ -1,10 +1,19 @@
 #include <cstdio>
+#include <inttypes.h>
 #include <iostream>
 #include <string>
 #include <vector>
 
+// #define DEBUG
+#ifndef DEBUG
 #define INPUT_PATH argv[1]
 #define OUTPUT_PATH argv[2]
+#endif // DEBUG
+#ifdef DEBUG
+#define INPUT_PATH "assets/public/instances/0.txt"
+#define OUTPUT_PATH "out.txt"
+#endif // DEBUG
+
 #define DEFAULT_VERTICES_COUNT 10
 
 using namespace std;
@@ -45,18 +54,21 @@ bool is_cyclic_util(uint32_t vertex, vector<bool> &visited,
                     vector<bool> &rec_stack, vector<vector<target_t>> &graph);
 
 uint32_t get_best_solution(vector<vector<target_t>> &graph,
-                           vector<edge_t> &removed_edges, uint32_t best_cost,
-                           uint32_t removed_cost, uint32_t depth);
+                           vector<edge_t> &removed_edges, uint32_t depth);
 
 int main(int argc, char const *argv[])
 {
-   /* Parse arguments */
+/* Parse arguments */
+#ifndef DEBUG
    if (argc < 4) {
       perror("Wrong number of arguments.");
       exit(EXIT_FAILURE);
    }
+
    /* Get time limit as a float */
    const float time_limit = stof(argv[3]);
+
+#endif // DEBUG
 
    /* Load data */
    FILE *input_p;
@@ -108,7 +120,7 @@ int main(int argc, char const *argv[])
    /* Iterate on all edges */
    uint32_t removed_cost = UINT32_MAX;
    vector<edge_t> removed_edges;
-   removed_cost = get_best_solution(graph, removed_edges, removed_cost, 0, 0);
+   removed_cost = get_best_solution(graph, removed_edges, removed_cost);
    if (!removed_cost) {
       perror("Map does not contains Penrose stairs!");
       exit(EXIT_FAILURE);
@@ -187,42 +199,36 @@ bool is_cyclic_util(uint32_t vertex, vector<bool> &visited,
 }
 
 uint32_t get_best_solution(vector<vector<target_t>> &graph,
-                           vector<edge_t> &removed_edges, uint32_t best_cost,
-                           uint32_t removed_cost, uint32_t depth)
+                           vector<edge_t> &removed_edges, uint32_t depth)
 {
+   uint32_t cost = 0;
    for (uint32_t vertex = 0; vertex < graph.size(); ++vertex) {
       for (uint32_t edge = 0; edge < graph[vertex].size(); ++edge) {
 
-         /* Remove edge */
+         /* Get edge */
          target_t tmp;
          tmp.cost = graph[vertex][edge].cost;
          tmp.to = graph[vertex][edge].to;
+
+         /* Remove edge */
          graph[vertex].erase(graph[vertex].begin() + edge);
 
-         removed_cost += tmp.cost;
+         cost = tmp.cost;
+         removed_edges.push_back({vertex, tmp.to});
 
          /* Check if is graph cyclic */
-         if (is_cyclic(graph)) {
+         if (is_cyclic(graph))
             /* Is graph cyclic, call recursive function */
-            best_cost = get_best_solution(graph, removed_edges, best_cost, removed_cost,
-                              depth + 1);
-         } else {
-            /* If graph isn't cyclic, update cost and add removed edge to vector
-             */
-            if (depth == 1) {
-               cout << "Found acyclic graph" << endl;
-               print_graph(graph);
-               cout << "removed cost: " << removed_cost
-                    << " best_cost: " << best_cost << endl;
-            }
-            if (best_cost > removed_cost)
-               best_cost = removed_cost;
-         }
+            cost += get_best_solution(graph, removed_edges, depth + 1);
 
-         /* Insert edge */
-         removed_cost -= tmp.cost;
-         graph[vertex].insert(graph[vertex].begin() + edge, tmp);
+         return cost;
+
+         // if (cost < best_cost) {
+         //    best_cost = cost;
+         // }
+
+         // /* Insert edge */
+         // graph[vertex].insert(graph[vertex].begin() + edge, tmp);
       }
    }
-   return best_cost;
 }
