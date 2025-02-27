@@ -14,8 +14,8 @@ paths = {
 
 # Load data
 with open(paths["input"], "r") as f:
-    locker_count, customer_count = map(int, f.readline().split())
-    order_count = list(map(int, f.readline().split()))
+    locker_count, customer_count = map(int, f.readline().split())  # M, N
+    order_count = list(map(int, f.readline().split()))  # n
     locker_height = list(map(int, f.readline().split()))
     orders = []
     for N in range(len(order_count)):
@@ -39,21 +39,31 @@ with open(paths["input"], "r") as f:
 
 m = g.Model()
 
-good_price = []
-for N in range(customer_count):
-    good_price.append(m.addVars(order_count[N],vtype=g.GRB.BINARY))
-    
-bonus_price = m.addVars(customer_count, vtype=g.GRB.BINARY, name="bonus_price")
+# Create variable
+good = {}
+# good[i,k,n], where i = customer, k = item, n = locker
+for i in range(customer_count):
+    for k in range(order_count[i]):
+        for n in range(locker_count):
+            good[i, k, n] = m.addVar(
+                vtype=g.GRB.BINARY, name=f"good_{i}_{k}_n")
+bonus = m.addVars(locker_count, vtype=g.GRB.BINARY, name="bonus_price")
 
 
+# Set objective: goal is maximize profit
 m.setObjective(
     g.quicksum(
-        g.quicksum(
-            orders[N]["price"][locker]*good_price[N][locker]
-            for locker in range(len(orders[N]["price"]))
-        )
-        for N in range(customer_count)),
-    sense=g.GRB.MAXIMIZE)
+        good[i, k, n] * orders[i]["price"][k]
+        for i in range(customer_count)
+        for k in range(order_count[i])
+        for n in range(locker_count)
+    )
+    +
+    g.quicksum(
+        bonus[i]*orders[i]["bonus"] for i in range(customer_count)
+    ),
+    g.GRB.MAXIMIZE
+)
 
 m.optimize()
 
@@ -61,6 +71,5 @@ m.optimize()
 ret = 0
 for order in orders:
     ret += sum(order["price"])
-    
+
 print(ret)
-    
