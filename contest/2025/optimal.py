@@ -18,11 +18,11 @@ with open(paths["input"], "r") as f:
     order_count = list(map(int, f.readline().split()))  # n
     locker_height = list(map(int, f.readline().split()))
     orders = []
-    for N in range(len(order_count)):
+    for N in range(customer_count):
         line = list(map(int, f.readline().split()))
         price = []
         height = []
-        for i in range(0, order_count[N]):
+        for i in range(1, len(line)):
             if i % 2 == 1:
                 price.append(line[i])
             else:
@@ -47,8 +47,7 @@ for i in range(customer_count):
         for n in range(locker_count):
             good[i, k, n] = m.addVar(
                 vtype=g.GRB.BINARY, name=f"good_{i}_{k}_n")
-bonus = m.addVars(locker_count, vtype=g.GRB.BINARY, name="bonus_price")
-
+bonus = m.addVars(locker_count, vtype=g.GRB.BINARY, name="bonus_price") 
 
 # Set objective: goal is maximize profit
 m.setObjective(
@@ -60,7 +59,7 @@ m.setObjective(
     )
     +
     g.quicksum(
-        bonus[i]*orders[i]["bonus"] for i in range(customer_count)
+        bonus[i]*orders[i]["bonus"] for i in range(locker_count)
     ),
     g.GRB.MAXIMIZE
 )
@@ -68,8 +67,5 @@ m.setObjective(
 m.optimize()
 
 # Print results
-ret = 0
-for order in orders:
-    ret += sum(order["price"])
 
-print(ret)
+
