@@ -47,7 +47,7 @@ for i in range(customer_count):
         for n in range(locker_count):
             good[i, k, n] = m.addVar(
                 vtype=g.GRB.BINARY, name=f"good_{i}_{k}_n")
-bonus = m.addVars(locker_count, vtype=g.GRB.BINARY, name="bonus_price") 
+bonus = m.addVars(len(order_count), vtype=g.GRB.BINARY, name="bonus_price") 
 
 # Set objective: goal is maximize profit
 m.setObjective(
@@ -59,10 +59,15 @@ m.setObjective(
     )
     +
     g.quicksum(
-        bonus[i]*orders[i]["bonus"] for i in range(locker_count)
+        bonus[i]*orders[i]["bonus"] for i in range(len(order_count))
     ),
     g.GRB.MAXIMIZE
 )
+
+# Create constrains
+
+# 1. locker max capacity
+# for locker in range()
 
 m.optimize()
 
