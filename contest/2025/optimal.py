@@ -35,17 +35,32 @@ with open(paths["input"], "r") as f:
         orders.append(order)
 
 
-print("L", locker_count, "C", customer_count)
-print("Customer order count ", order_count)
-print("Locker height", locker_height)
-
-for order in orders:
-    print(order)
-
-
 # Solve by Gurobi model
 
-# m = g.Model()
+m = g.Model()
 
+good_price = []
+for N in range(customer_count):
+    good_price.append(m.addVars(order_count[N],vtype=g.GRB.BINARY))
+    
+bonus_price = m.addVars(customer_count, vtype=g.GRB.BINARY, name="bonus_price")
+
+
+m.setObjective(
+    g.quicksum(
+        g.quicksum(
+            orders[N]["price"][locker]*good_price[N][locker]
+            for locker in range(len(orders[N]["price"]))
+        )
+        for N in range(customer_count)),
+    sense=g.GRB.MAXIMIZE)
+
+m.optimize()
 
 # Print results
+ret = 0
+for order in orders:
+    ret += sum(order["price"])
+    
+print(ret)
+    
