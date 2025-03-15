@@ -1,6 +1,18 @@
 import gurobipy as g
 import sys
 
+
+def get_lock_position(i, k, n):
+    """The function is the MACRO for unify access to the `g_p` gurobi variable.
+
+    Args:
+        i (int): customer id
+        k (int): good id
+        k (object): list of `order_count`
+    """
+    return sum(n[:i]) + k
+
+
 # Parse arguments
 if len(sys.argv) < 3:
     print("ERROR: You do not specify arguments correctly!")
@@ -39,11 +51,26 @@ with open(paths["input"], "r") as f:
 
 m = g.Model("TurkeyBox")
 
-# Create variables
 
-# Create constrains
+# CREATE VARIABLES
+# je zbozi umisteno
+g_p = m.addVars(sum(order_count), vtype=g.GRB.BINARY, name="Good is placed")
 
-# Create objective
+# CREATE CONSTRAINS
+# 1) Single customer per locker
+# 2) Locker is not overfilled
+
+
+# CREATE OBJECTIVE
+# maximize the profit
+m.setObjective(
+    g.quicksum(
+        orders[i]["price"][k] * g_p[get_lock_position(i, k, order_count)]
+        for i in range(customer_count)
+        for k in range(order_count[i])
+    ), g.GRB.MAXIMIZE
+)
+
 
 # Solve the model
 m.optimize()
