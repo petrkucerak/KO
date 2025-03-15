@@ -55,10 +55,23 @@ m = g.Model("TurkeyBox")
 # CREATE VARIABLES
 # je zbozi umisteno
 g_p = m.addVars(sum(order_count), vtype=g.GRB.BINARY, name="Good is placed")
+b = m.addVars(customer_count, vtype=g.GRB.BINARY, name="Bonus is earned")
 
 # CREATE CONSTRAINS
 # 1) Single customer per locker
+
+
 # 2) Locker is not overfilled
+
+
+# 3) Get bonus from customer
+for i in range(customer_count):
+    m.addConstr(
+        g.quicksum(
+            g_p[get_lock_position(i, k, order_count)]
+            for k in range(order_count[i])
+        ) >= order_count[i] * b[i]
+    )
 
 
 # CREATE OBJECTIVE
@@ -68,6 +81,9 @@ m.setObjective(
         orders[i]["price"][k] * g_p[get_lock_position(i, k, order_count)]
         for i in range(customer_count)
         for k in range(order_count[i])
+    ) + g.quicksum(
+        b[i] * orders[i]["bonus"]
+        for i in range(customer_count)
     ), g.GRB.MAXIMIZE
 )
 
