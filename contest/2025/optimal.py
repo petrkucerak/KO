@@ -37,45 +37,15 @@ with open(paths["input"], "r") as f:
 
 # Solve by Gurobi model
 
-m = g.Model()
+m = g.Model("TurkeyBox")
 
-# Create variable
-good = {}
-# good[i,k,n], where i = customer, k = item, n = locker
-for i in range(customer_count):
-    for k in range(order_count[i]):
-        for n in range(locker_count):
-            good[i, k, n] = m.addVar(
-                vtype=g.GRB.BINARY, name=f"good_{i}_{k}_n")
-bonus = m.addVars(len(order_count), vtype=g.GRB.BINARY, name="bonus_price")
-
-# Set objective: goal is maximize profit
-m.setObjective(
-    g.quicksum(
-        good[i, k, n] * orders[i]["price"][k]
-        for i in range(customer_count)
-        for k in range(order_count[i])
-        for n in range(locker_count)
-    )
-    +
-    g.quicksum(
-        bonus[i]*orders[i]["bonus"] for i in range(len(order_count))
-    ),
-    g.GRB.MAXIMIZE
-)
+# Create variables
 
 # Create constrains
 
-# 1. locker max height
-for n in range(locker_count):
-    m.addConstr(
-        g.quicksum(
-            good[i, k, n]*orders[i]["height"][k]
-            for i in range(customer_count)
-            for k in range(order_count[i])
-        ) <= locker_height[n], name=f"max_height_{n}")
+# Create objective
 
+# Solve the model
 m.optimize()
 
 # Print results
-# TODO: as a first
