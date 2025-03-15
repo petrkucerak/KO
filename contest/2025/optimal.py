@@ -56,12 +56,16 @@ m = g.Model("TurkeyBox")
 # je zbozi umisteno
 g_p = m.addVars(sum(order_count), vtype=g.GRB.BINARY, name="Good is placed")
 b = m.addVars(customer_count, vtype=g.GRB.BINARY, name="Bonus is earned")
+l_h = m.addVars(locker_count, vtype=g.GRB.CONTINUOUS,
+                name="Locker actual heigh", lb=0)
 
 # CREATE CONSTRAINS
 # 1) Single customer per locker
 
 
 # 2) Locker is not overfilled
+for n in range(locker_count):
+    m.addConstr(l_h[n] <= locker_height[n])
 
 
 # 3) Get bonus from customer
