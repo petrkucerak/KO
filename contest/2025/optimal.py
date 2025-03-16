@@ -129,3 +129,13 @@ m.setObjective(
 m.optimize()
 
 # Print results
+with open(paths["output"], 'w') as f:
+    if m.status == g.GRB.OPTIMAL:
+        f.write(f"{int(m.objVal)}\n")
+        for i in range(customer_count):
+            for k in range(order_count[i]):
+                assigned_locker = next(
+                    (l+1 for l in range(locker_count) if r[i, k, l].x > 0.5), 0)
+                f.write(f"{assigned_locker}\n")
+    else:
+        f.write("0\n")
