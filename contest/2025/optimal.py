@@ -2,17 +2,6 @@ import gurobipy as g
 import sys
 
 
-def get_lock_position(i, k, n):
-    """The function is the MACRO for unify access to the `g_p` gurobi variable.
-
-    Args:
-        i (int): customer id
-        k (int): good id
-        k (object): list of `order_count`
-    """
-    return sum(n[:i]) + k
-
-
 # Parse arguments
 if len(sys.argv) < 3:
     print("ERROR: You do not specify arguments correctly!")
@@ -47,34 +36,53 @@ with open(paths["input"], "r") as f:
         orders.append(order)
 
 
+# Test sum
+print(
+    "TEST SUM WITHOUT BONUS",
+    sum(sum(orders[i]["price"]) for i in range(customer_count))
+)
+
+print(
+    "TEST SUM WITHT BONUS",
+    sum(sum(orders[i]["price"]) for i in range(customer_count)) + 
+    sum(orders[i]["bonus"] for i in range(customer_count))
+)
+
+
 # Solve by Gurobi model
 
 m = g.Model("TurkeyBox")
 
-
 # CREATE VARIABLES
-# je zbozi umisteno
-g_p = m.addVars(sum(order_count), vtype=g.GRB.BINARY, name="Good is placed")
+# kam je zpozi umisteno
+r = {}  # r[i, k, l]
+# i ... customer
+# k ... order
+# l ... locker
+for i in range(customer_count):
+    for k in range(order_count[i]):
+        for l in range(locker_count):
+            r[i, k, l] = m.addVar(
+                vtype=g.GRB.BINARY,
+                name=f"raster_{i}_{k}_{l}"
+            )
 b = m.addVars(customer_count, vtype=g.GRB.BINARY, name="Bonus is earned")
-l_h = m.addVars(locker_count, vtype=g.GRB.CONTINUOUS,
-                name="Locker actual heigh", lb=0)
+
 
 # CREATE CONSTRAINS
 # 1) Single customer per locker
 
 
-
 # 2) Locker is not overfilled
-for n in range(locker_count):
-    m.addConstr(l_h[n] <= locker_height[n])
 
 
 # 3) Get bonus from customer
 for i in range(customer_count):
     m.addConstr(
         g.quicksum(
-            g_p[get_lock_position(i, k, order_count)]
+            r[i, k, l]
             for k in range(order_count[i])
+            for l in range(locker_count)
         ) >= order_count[i] * b[i]
     )
 
@@ -82,14 +90,20 @@ for i in range(customer_count):
 # CREATE OBJECTIVE
 # maximize the profit
 m.setObjective(
+    # sum of placed goods
     g.quicksum(
-        orders[i]["price"][k] * g_p[get_lock_position(i, k, order_count)]
+        r[i, k, l] * orders[i]["price"][k]
         for i in range(customer_count)
         for k in range(order_count[i])
-    ) + g.quicksum(
+        for l in range(locker_count)
+    ) +
+    # bonus for complete whole orders
+    g.quicksum(
         b[i] * orders[i]["bonus"]
         for i in range(customer_count)
-    ), g.GRB.MAXIMIZE
+    ),
+    g.GRB.MAXIMIZE
+
 )
 
 
