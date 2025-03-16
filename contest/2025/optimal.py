@@ -63,6 +63,7 @@ l_h = m.addVars(locker_count, vtype=g.GRB.CONTINUOUS,
 # 1) Single customer per locker
 
 
+
 # 2) Locker is not overfilled
 for n in range(locker_count):
     m.addConstr(l_h[n] <= locker_height[n])
