@@ -71,6 +71,14 @@ b = m.addVars(customer_count, vtype=g.GRB.BINARY, name="Bonus is earned")
 
 # CREATE CONSTRAINS
 # 1) Single customer per locker
+for l in range(locker_count):
+    for i in range(customer_count):  # customer i
+        for j in range(i+1, customer_count):  # customer j
+            m.addConstr(
+                g.quicksum(r[i, k, l] for k in range(order_count[i])) *
+                g.quicksum(r[j, k, l] for k in range(order_count[j])) == 0,
+                name=f"singe_customer_{i}_{j}_{m}"
+            )
 
 
 # 2) Locker is not overfilled
@@ -80,7 +88,8 @@ for l in range(locker_count):
             orders[i]["height"][k] * r[i, k, l]
             for i in range(customer_count)
             for k in range(order_count[i])
-        ) <= locker_height[l]
+        ) <= locker_height[l],
+        name=f"capacity_{l}"
     )
 
 
@@ -91,7 +100,8 @@ for i in range(customer_count):
             r[i, k, l]
             for k in range(order_count[i])
             for l in range(locker_count)
-        ) >= order_count[i] * b[i]
+        ) >= order_count[i] * b[i],
+        name=f"bonus_{i}"
     )
 
 
