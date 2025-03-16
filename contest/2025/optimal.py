@@ -44,7 +44,7 @@ print(
 
 print(
     "TEST SUM WITHT BONUS",
-    sum(sum(orders[i]["price"]) for i in range(customer_count)) + 
+    sum(sum(orders[i]["price"]) for i in range(customer_count)) +
     sum(orders[i]["bonus"] for i in range(customer_count))
 )
 
@@ -74,6 +74,14 @@ b = m.addVars(customer_count, vtype=g.GRB.BINARY, name="Bonus is earned")
 
 
 # 2) Locker is not overfilled
+for l in range(locker_count):
+    m.addConstr(
+        g.quicksum(
+            orders[i]["height"][k] * r[i, k, l]
+            for i in range(customer_count)
+            for k in range(order_count[i])
+        ) <= locker_height[l]
+    )
 
 
 # 3) Get bonus from customer
