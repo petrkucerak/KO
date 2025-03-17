@@ -124,7 +124,7 @@ for i in range(customer_count):
             r[i, k, l]
             for k in range(order_count[i])
             for l in range(locker_count)
-        ) == order_count[i] * b[i],
+        ) >= order_count[i] * b[i],
         name=f"bonus_{i}"
     )
 
