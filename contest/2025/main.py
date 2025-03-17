@@ -128,6 +128,16 @@ for i in range(customer_count):
         name=f"bonus_{i}"
     )
 
+# 4) Order can be stored only once or nowhere
+for i in range(customer_count):
+    for k in range(order_count[i]):
+        m.addConstr(
+            g.quicksum(
+                r[i, k, l]
+                for l in range(locker_count)
+            ) <= 1
+        )
+
 
 # CREATE OBJECTIVE
 # maximize the profit
@@ -152,6 +162,17 @@ m.setObjective(
 # Solve the model
 m.optimize()
 
+
+# Debug prints
+for l in range(locker_count):
+    assigned_customers = [i for i in range(customer_count) if any(
+        r[i, k, l].x > 0.5 for k in range(order_count[i]))]
+    print(f"Locker {l+1} used by customers: {assigned_customers}")
+
+for i in range(customer_count):
+    print(f"Customer {i+1} bonus: {b[i].x}")
+
+
 # Print results
 with open(paths["output"], 'w') as f:
     if m.status == g.GRB.OPTIMAL:
@@ -159,6 +180,9 @@ with open(paths["output"], 'w') as f:
         for i in range(customer_count):
             for k in range(order_count[i]):
                 assigned_locker = next(
+                    # debug print
+                    # (f"{l+1} [{i};{k}]" for l in range(locker_count) if r[i, k, l].x > 0.5), f"0 [{i};{k}]")
+                    # production print
                     (l+1 for l in range(locker_count) if r[i, k, l].x > 0.5), 0)
                 f.write(f"{assigned_locker}\n")
     else:
