@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import gurobipy as g
 import sys
 
