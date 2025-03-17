@@ -77,7 +77,7 @@ for l in range(locker_count):
             m.addConstr(
                 g.quicksum(r[i, k, l] for k in range(order_count[i])) *
                 g.quicksum(r[j, k, l] for k in range(order_count[j])) == 0,
-                name=f"singe_customer_{i}_{j}_{m}"
+                name=f"singe_customer_{i}_{j}_{l}"
             )
 
 
