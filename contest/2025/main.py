@@ -72,26 +72,38 @@ for i in range(customer_count):
             )
 b = m.addVars(customer_count, vtype=g.GRB.BINARY, name="Bonus is earned")
 
-z = {} # z[i, l]  # Binary variables indicating if customer i uses locker l
+z = {}  # z[i, l]  # Binary variables indicating if customer i uses locker l
 # i ... customer
 # l ... locker
 for i in range(customer_count):
     for l in range(locker_count):
         z[i, l] = m.addVar(vtype=g.GRB.BINARY, name=f"z_{i}_{l}")
-        
+
 # CREATE CONSTRAINS
 # 1) Single customer per locker
 # Link z[i, l] to r[i, k, l]
 for i in range(customer_count):
     for l in range(locker_count):
-        m.addConstr(M * z[i, l] >= g.quicksum(r[i, k, l] for k in range(order_count[i])))
-        m.addConstr(z[i, l] <= g.quicksum(r[i, k, l] for k in range(order_count[i])))
+        # if in this lock exist any order, z value will be always 1 else 0
+        m.addConstr(
+            M * z[i, l] >= g.quicksum(
+                r[i, k, l]
+                for k in range(order_count[i])
+            )
+        )
+        m.addConstr(
+            z[i, l] <= g.quicksum(
+                r[i, k, l]
+                for k in range(order_count[i])
+            )
+        )
 
 # Ensure only one customer can use a locker
 for l in range(locker_count):
-    for i in range(customer_count):
-        for j in range(i + 1, customer_count):
-            m.addConstr(z[i, l] + z[j, l] <= 1)
+    m.addConstr(
+        g.quicksum(z[i, l] for i in range(customer_count)) <= 1,
+        name=f"single_customer_{l}"
+    )
 
 # 2) Locker is not overfilled
 for l in range(locker_count):
