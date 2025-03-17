@@ -55,6 +55,8 @@ print(
 
 m = g.Model("TurkeyBox")
 
+M = max(max(order_count), 1)  # A reasonable big-M
+
 # CREATE VARIABLES
 # kam je zpozi umisteno
 r = {}  # r[i, k, l]
@@ -70,18 +72,19 @@ for i in range(customer_count):
             )
 b = m.addVars(customer_count, vtype=g.GRB.BINARY, name="Bonus is earned")
 
-M = max(max(order_count), 1)  # A reasonable big-M
-
-z = {}  # Binary variables indicating if customer i uses locker l
-
+z = {} # z[i, l]  # Binary variables indicating if customer i uses locker l
+# i ... customer
+# l ... locker
 for i in range(customer_count):
     for l in range(locker_count):
         z[i, l] = m.addVar(vtype=g.GRB.BINARY, name=f"z_{i}_{l}")
-
+        
+# CREATE CONSTRAINS
+# 1) Single customer per locker
 # Link z[i, l] to r[i, k, l]
 for i in range(customer_count):
     for l in range(locker_count):
-        m.addConstr(z[i, l] >= g.quicksum(r[i, k, l] for k in range(order_count[i])) / M)
+        m.addConstr(M * z[i, l] >= g.quicksum(r[i, k, l] for k in range(order_count[i])))
         m.addConstr(z[i, l] <= g.quicksum(r[i, k, l] for k in range(order_count[i])))
 
 # Ensure only one customer can use a locker
