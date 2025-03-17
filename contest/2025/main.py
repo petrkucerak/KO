@@ -165,7 +165,7 @@ m.optimize()
 
 # Debug prints
 for l in range(locker_count):
-    assigned_customers = [i for i in range(customer_count) if any(
+    assigned_customers = [i + 1 for i in range(customer_count) if any(
         r[i, k, l].x > 0.5 for k in range(order_count[i]))]
     print(f"Locker {l+1} used by customers: {assigned_customers}")
 
