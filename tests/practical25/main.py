@@ -32,6 +32,21 @@ with open(path_input, "r") as f:
     # load g - popularity of machine m with guys
     machine_popularity_g = list(map(int, f.readline().split()))
 
+    machine_types_0 = []
+    for m in range(M):
+        if machine_types[m] == 0:
+            machine_types_0.append(m)
+
+    machine_types_1 = []
+    for m in range(M):
+        if machine_types[m] == 1:
+            machine_types_1.append(m)
+
+    machine_types_2 = []
+    for m in range(M):
+        if machine_types[m] == 2:
+            machine_types_2.append(m)
+
     # load complementary pairs
     pairs = []
     for i in range(C):
@@ -52,7 +67,6 @@ mod = g.Model("Gym Placement")
 
 # Create variables
 board = mod.addVars(M, P, vtype=g.GRB.BINARY)
-# Note: condition 2. is solved by BINARY variable type.
 
 
 # Add constrains
@@ -65,13 +79,45 @@ for p in range(P):
         ) <= 1
     )
 
+# 2. each place is occupied by at most one machine
+for m in range(M):
+    mod.addConstr(
+        g.quicksum(
+            board[m, p]
+            for p in range(P)
+        ) <= 1
+    )
+
 # 3. the gym should provide enough machines of each type
 # (for each type t there must be at least n_t machines)
-for p in range(P):
-    for m in range(M):
-        if machine_types[m] == 0:
-            mod.addConstr()
+mod.addConstr(
+    g.quicksum(
+        board[machine_types_0[m], p]
+        for m in range(len(machine_types_0))
+        for p in range(P)
+    ) >= machine_types_require[0]
+)
+mod.addConstr(
+    g.quicksum(
+        board[machine_types_1[m], p]
+        for m in range(len(machine_types_1))
+        for p in range(P)
+    ) >= machine_types_require[1]
+)
+mod.addConstr(
+    g.quicksum(
+        board[machine_types_2[m], p]
+        for m in range(len(machine_types_2))
+        for p in range(P)
+    ) >= machine_types_require[2]
+)
 
+# 4. position
+for m in range(M):
+    for p in range(P):
+        mod.addConstr(
+            board[m, p] * machine_sizes[m] <= place_dimension[p]
+        )
 
 
 # Set objective
@@ -90,6 +136,12 @@ mod.optimize()
 if mod.Status == g.GRB.Status.INFEASIBLE:
     ret = "-1"
 else:
-    ret = ""
+    ret = f"{int(mod.objVal)}\n"
+    for m in range(M):
+        pos = -1
+        for p in range(P):
+            if board[m, p].x > 0.5:
+                pos = p
+        ret += f"{pos} "
 with open(path_output, "w+") as f:
     f.write(ret)
