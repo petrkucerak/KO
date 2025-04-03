@@ -34,52 +34,9 @@ with open(path_input, "r") as f:
 
 m = g.Model()
 # create the river model
-river = np.zeros((height, width))
-for y in range(height):
-    for x in range(width):
-        river[y, x] = river_strength[x]
-for i in range(rock_count):
-    river[rock_positions[i]["y"], rock_positions[i]["x"]] = 0
-
-print(river)
-
-power = m.addVars(height + 3, width, vtype=g.GRB.BINARY,
-                  name="Existence of power turbine")
-
-# limit count of power plats in all river
-m.addConstr(power.sum() <= max_dams)
-
-# limit count of power station for each row in the river
-for y in range(height + 3):
-    m.addConstr(g.quicksum(power[y, x]
-                for x in range(width)) <= max_single_dams)
-
-# set virtual power to zero
-m.addConstr(power.sum(0, "*") == 0)
-m.addConstr(power.sum(1, "*") == 0)
-m.addConstr(power.sum(2, "*") == 0)
-
-
-m.setObjective(g.quicksum(power[y+3, x] * river[y, x]
-                          - power[y-1+3, x] * 3  # direction 1
-                          - power[y-2+3, x] * 2  # direction 2
-                          - power[y-3+3, x] * 1  # direction 3
-                          for x in range(width) for y in range(height)),
-               g.GRB.MAXIMIZE)
 
 m.optimize()
 
-power_output = 0
 ret = ""
-
-for y in range(height):
-    for x in range(width):
-        if round(power[y+3, x].x) == 1:
-            ret += str(x) + " " + str(y) + "\n"
-            power_output += river[y, x]
-ret = str(round(power_output)) + "\n" + ret
-
-print(ret)
-
 with open(path_output, "w+") as f:
     f.write(ret)
