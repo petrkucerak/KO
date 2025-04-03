@@ -14,28 +14,40 @@ path_output = sys.argv[2]
 with open(path_input, "r") as f:
     # load metadata
     metadata = f.readline().split()
-    width = int(metadata[0])            # N
-    height = int(metadata[1])           # M
-    max_dams = int(metadata[2])         # D
-    max_single_dams = int(metadata[3])  # S
-    rock_count = int(metadata[4])       # R
+    M = int(metadata[0]) # number of machines
+    P = int(metadata[1]) # number of possible machine placements
+    C = int(metadata[2]) # number of complementary pairs
+    U = int(metadata[3]) # minimum popularity fro guys or ladies
+    
+    # load t - machine types
+    machine_types = list(map(int, f.readline().split()))
+    # load n - required number of machine types
+    machine_types_require = list(map(int, f.readline().split()))
+    # load s - size of machine
+    machine_sizes = list(map(int, f.readline().split()))
+    # load d - place dimensions
+    place_dimension = list(map(int, f.readline().split()))
+    # load l - popularity of machine m with ladies
+    machine_popularity_l = list(map(int, f.readline().split()))
+    # load g - popularity of machine m with guys
+    machine_popularity_g = list(map(int, f.readline().split()))
+    
+    # load complementary pairs
+    pairs = []
+    for i in range(C):
+        pair = list(map(int, f.readline().split()))
+        pairs.append(pair)
+        
+    print(pairs)
+        
 
-    # load river strength
-    river_strength = f.readline().split()
-    for i in range(width):
-        river_strength[i] = int(river_strength[i])
-
-    # load rock positions
-    rock_positions = []
-    for i in range(rock_count):
-        line = f.readline().split()
-        rock_positions.append({"x": int(line[0]), "y": int(line[1])})
 
 
-m = g.Model()
-# create the river model
 
-m.optimize()
+# m = g.Model()
+# # create the river model
+
+# m.optimize()
 
 ret = ""
 with open(path_output, "w+") as f:
