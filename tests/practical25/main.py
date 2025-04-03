@@ -67,6 +67,10 @@ for p in range(P):
 
 # 3. the gym should provide enough machines of each type
 # (for each type t there must be at least n_t machines)
+for p in range(P):
+    for m in range(M):
+        if machine_types[m] == 0:
+            mod.addConstr()
 
 
 
@@ -83,6 +87,9 @@ mod.setObjective(
 
 mod.optimize()
 
-ret = ""
+if mod.Status == g.GRB.Status.INFEASIBLE:
+    ret = "-1"
+else:
+    ret = ""
 with open(path_output, "w+") as f:
     f.write(ret)
