@@ -38,7 +38,14 @@ with open(path_input, "r") as f:
         pair = list(map(int, f.readline().split()))
         pairs.append(pair)
         
-    print(pairs)
+    # Testing print
+    print("machine_types: ", machine_types)
+    print("machine_types_require: ", machine_types_require)
+    print("machine_sizes: ", machine_sizes)
+    print("place_dimension: ", place_dimension)
+    print("machine_popularity_l: ", machine_popularity_l)
+    print("machine_popularity_g: ", machine_popularity_g)
+    print("pairs: ", pairs)
         
 
 
