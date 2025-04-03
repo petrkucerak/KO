@@ -48,10 +48,40 @@ with open(path_input, "r") as f:
     print("pairs: ", pairs)
 
 
-# m = g.Model()
-# # create the river model
+mod = g.Model("Gym Placement")
 
-# m.optimize()
+# Create variables
+board = mod.addVars(M, P, vtype=g.GRB.BINARY)
+# Note: condition 2. is solved by BINARY variable type.
+
+
+# Add constrains
+# 1. each machine can be used once - means that sum of p should be max 1
+for p in range(P):
+    mod.addConstr(
+        g.quicksum(
+            board[m, p]
+            for m in range(M)
+        ) <= 1
+    )
+
+# 3. the gym should provide enough machines of each type
+# (for each type t there must be at least n_t machines)
+
+
+
+# Set objective
+mod.setObjective(
+    g.quicksum(
+        board[m, p] * machine_popularity_l[m] +     # ladies popularity
+        board[m, p] * machine_popularity_g[m]       # guys popularity
+        for p in range(P)
+        for m in range(M)
+    ),
+    g.GRB.MAXIMIZE
+)
+
+mod.optimize()
 
 ret = ""
 with open(path_output, "w+") as f:
