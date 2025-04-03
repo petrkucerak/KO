@@ -14,11 +14,11 @@ path_output = sys.argv[2]
 with open(path_input, "r") as f:
     # load metadata
     metadata = f.readline().split()
-    M = int(metadata[0]) # number of machines
-    P = int(metadata[1]) # number of possible machine placements
-    C = int(metadata[2]) # number of complementary pairs
-    U = int(metadata[3]) # minimum popularity fro guys or ladies
-    
+    M = int(metadata[0])  # number of machines
+    P = int(metadata[1])  # number of possible machine placements
+    C = int(metadata[2])  # number of complementary pairs
+    U = int(metadata[3])  # minimum popularity fro guys or ladies
+
     # load t - machine types
     machine_types = list(map(int, f.readline().split()))
     # load n - required number of machine types
@@ -31,13 +31,13 @@ with open(path_input, "r") as f:
     machine_popularity_l = list(map(int, f.readline().split()))
     # load g - popularity of machine m with guys
     machine_popularity_g = list(map(int, f.readline().split()))
-    
+
     # load complementary pairs
     pairs = []
     for i in range(C):
         pair = list(map(int, f.readline().split()))
         pairs.append(pair)
-        
+
     # Testing print
     print("machine_types: ", machine_types)
     print("machine_types_require: ", machine_types_require)
@@ -46,9 +46,6 @@ with open(path_input, "r") as f:
     print("machine_popularity_l: ", machine_popularity_l)
     print("machine_popularity_g: ", machine_popularity_g)
     print("pairs: ", pairs)
-        
-
-
 
 
 # m = g.Model()
