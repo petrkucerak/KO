@@ -32,3 +32,19 @@ they have to fit given the locker’s size.
 ```sh
 python optimal.py dataset/1.ins tmp.out # to run testing solution
 ```
+
+## Threshold and Ranking
+
+```sh
+# Build binary
+cmake --build .
+
+# Run binary
+./TurkeyBox <input_path> <output_path>
+
+# Create zip file
+cmake --build . --target zip_sources
+
+# Build and run binary
+cmake --build . && ./TurkeyBox <input_path> <output_path>
+```
