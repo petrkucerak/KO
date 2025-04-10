@@ -26,3 +26,5 @@ CMakeUserPresets.json
 
 *.zip
 TurkeyBox
+
+.vscode

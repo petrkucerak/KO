@@ -1,7 +1,9 @@
+#include "main.h"
 #include <cinttypes>
 #include <fstream>
 #include <iostream>
 #include <stdexcept>
+#include <vector>
 
 using namespace std;
 
@@ -16,10 +18,33 @@ int main(int argc, char const *argv[])
    }
 
    // LOAD DATA
-   string tmp;
    ifstream input(argv[1]);
+   // Load metadata
    uint32_t locker_count, customer_count;
    input >> locker_count >> customer_count;
+   // Load items_counts
+   vector<uint32_t> items_counts(customer_count);
+   for (auto &count : items_counts) {
+      input >> count;
+   }
+   // Load locker_sizes
+   vector<Size> locker_sizes(locker_count);
+   for (auto &size : locker_sizes) {
+      input >> size.width >> size.height;
+   }
+   // Load customer_orders
+   std::vector<OrderList> order_list;
+   order_list.reserve(customer_count);
+
+   for (uint32_t i = 0; i < customer_count; ++i) {
+      OrderList list(items_counts[i]);
+      input >> list.bonus;
+      for (auto &order : list.orders) {
+         input >> order.payment >> order.width >> order.height;
+      }
+      order_list.push_back(move(list));
+   }
+
    input.close();
 
    // Save data
@@ -38,33 +63,3 @@ int main(int argc, char const *argv[])
 // - list of items
 //   - price
 //   - parameters
-
-class Parameters
-{
-   public:
-   uint32_t width;
-   uint32_t height;
-   Parameters() : width(0), height(0) {} // Default constructor
-   Parameters(uint32_t width, uint32_t height)
-   {
-      this->height = height;
-      this->width = width;
-   }
-};
-
-class Locker
-{
-   public:
-   Parameters size;
-   Parameters occupancy;
-
-   Locker(uint32_t width, uint32_t height)
-   {
-      this->size.width = width;
-      this->size.height = height;
-      this->occupancy.width = 0;
-      this->occupancy.height = 0;
-   }
-
-   void addItem(Parameters item_size) {}
-};
