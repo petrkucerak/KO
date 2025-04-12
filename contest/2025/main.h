@@ -53,7 +53,7 @@ class OrderList
       }
    };
 
-   static void print_list(vector<OrderList> order_list)
+   static void print_list(vector<OrderList> &order_list)
    {
       for (auto order : order_list) {
          cout << endl;
