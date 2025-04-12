@@ -46,6 +46,8 @@ int main(int argc, char const *argv[])
    }
    input.close();
 
+   OrderList::print_list(order_list);
+
    // PRINT DATA RESULTS INTO THE FILE
    ofstream output(argv[2]);
    output << "This is the output file" << endl;
