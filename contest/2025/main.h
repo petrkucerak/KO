@@ -17,18 +17,6 @@ class Size
    Size(uint32_t width, uint32_t height) : width(width), height(height) {};
 };
 
-class Locker : public Size
-{
-   public:
-   uint32_t customer_id;
-   /* List of (customer_idx, items_idx) assigned */
-   vector<pair<uint32_t, uint32_t>> items;
-
-   Locker() : Size(), customer_id(0) {};
-   Locker(uint32_t width, uint32_t height)
-       : Size(width, height), customer_id(0) {};
-};
-
 class Order : public Size
 {
    public:
@@ -66,6 +54,37 @@ class OrderList
          }
       }
    };
+};
+
+class Skyline
+{
+   public:
+   vector<pair<uint32_t, uint32_t>> segments; // (x, height)
+
+   Skyline(uint32_t locker_width)
+   {
+      segments.emplace_back(0, 0); // Initial skyline: height 0 at x=0
+   }
+};
+
+class Locker : public Size
+{
+   public:
+   uint32_t customer_id; // 0 if unassigned, else customer index + 1
+   Skyline skyline;
+
+   Locker() : Size(), customer_id(0), skyline(0) {};
+   Locker(uint32_t width, uint32_t height)
+       : Size(width, height), customer_id(0), skyline(width) {};
+};
+
+class Solver
+{
+   public:
+   uint64_t objective;
+   vector<OrderList> order_list;
+
+   Solver() : objective(0) {};
 };
 
 #endif /* __MAIN_H */

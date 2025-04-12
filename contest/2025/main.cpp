@@ -47,12 +47,12 @@ int main(int argc, char const *argv[])
    }
    input.close();
 
-   uint64_t objective = UINT64_MAX;
+   Solver solver;
 
    // PRINT DATA RESULTS INTO THE FILE
    ofstream output(argv[2]);
    // Print objective
-   output << objective << endl;
+   output << solver.objective << endl;
    OrderList::print_list(order_list, output);
    output.close();
    cout << "The computing is done. See algorithm results in " << argv[2]
