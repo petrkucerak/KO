@@ -28,8 +28,8 @@ int main(int argc, char const *argv[])
       input >> count;
    }
    // Load locker_sizes
-   vector<Size> locker_sizes(locker_count);
-   for (auto &size : locker_sizes) {
+   vector<Locker> lockers(locker_count);
+   for (auto &size : lockers) {
       input >> size.width >> size.height;
    }
    // Load customer_orders
@@ -46,14 +46,17 @@ int main(int argc, char const *argv[])
    }
    input.close();
 
-   OrderList::print_list(order_list);
+   uint32_t objective = UINT32_MAX;
 
    // PRINT DATA RESULTS INTO THE FILE
    ofstream output(argv[2]);
-   output << "This is the output file" << endl;
+   // Print objective
+   output << objective << endl;
+   // Print orders
+   OrderList::print_list(order_list, output);
    output.close();
-
-   cout << "Hello world" << endl;
+   cout << "The computing is done. See algorithm results in " << argv[2]
+        << endl;
    return 0;
 }
 
