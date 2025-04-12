@@ -52,23 +52,18 @@ class OrderList
 
    OrderList(uint32_t items_count) : bonus(0), orders(items_count) {};
 
-   void print(ostream& target)
+   static void print_list(vector<OrderList> &order_list, ostream &target)
    {
-      for (auto order : orders) {
-         // print in format `π x y r`, where
-         // π ... locker_id
-         // x ... x position in a box
-         // y ... y position in a box
-         // r ... rotated
-         target << order.locker_id << " " << order.x << " " << order.y << " "
-              << order.rotated << endl;
-      }
-   };
-
-   static void print_list(vector<OrderList> &order_list, ostream& target)
-   {
-      for (auto order : order_list) {
-         order.print(target);
+      for (auto &customer : order_list) {
+         for (auto &order : customer.orders) {
+            // print in format `π x y r`, where
+            // π ... locker_id
+            // x ... x position in a box
+            // y ... y position in a box
+            // r ... rotated
+            target << order.locker_id << " " << order.x << " " << order.y << " "
+                   << order.rotated << endl;
+         }
       }
    };
 };

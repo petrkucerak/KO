@@ -10,12 +10,13 @@ using namespace std;
 int main(int argc, char const *argv[])
 {
    // Parse arguments
-   if (argc < 3) {
+   if (argc < 4) {
       throw invalid_argument("\
          Please, specify program input correctly!\n\
-         Right input is: ./program_name <input_path> <output_path>\
+         Right input is: ./program_name <input_path> <output_path> <time_limit>\
       ");
    }
+   double time_limit = stod(argv[3]);
 
    // LOAD DATA
    ifstream input(argv[1]);
@@ -46,13 +47,12 @@ int main(int argc, char const *argv[])
    }
    input.close();
 
-   uint32_t objective = UINT32_MAX;
+   uint64_t objective = UINT64_MAX;
 
    // PRINT DATA RESULTS INTO THE FILE
    ofstream output(argv[2]);
    // Print objective
    output << objective << endl;
-   // Print orders
    OrderList::print_list(order_list, output);
    output.close();
    cout << "The computing is done. See algorithm results in " << argv[2]
