@@ -5,7 +5,9 @@ import sys
 from collections import deque
 
 
-def create_edge(u, v, cost=0, lower_bound=0, upper_bound=1, flow=0, residual_flow=0, pair=None):
+def create_edge(u: int, v: int, cost: float = 0, lower_bound: int = 0,
+                upper_bound: int = 1, flow: int = 0, residual_flow: int = 0,
+                pair: dict = None) -> dict:
     return {
         'u': u,
         'v': v,
@@ -23,7 +25,7 @@ def augment_edge(edge, val):
     edge['flow'] += val
 
 
-def add_edge(graph, edge):
+def add_edge(graph: list[list[dict]], edge: dict) -> None:
     graph[edge['u']].append(edge)
 
 
@@ -71,6 +73,9 @@ def calculate_augmentation(parents, s, t):
 
 
 def edmonds_karp(graph, s, t):
+    '''
+    described in: https://www.w3schools.com/dsa/dsa_algo_graphs_edmondskarp.php
+    '''
     flow = 0
     while True:
         parents = bfs(graph, s, t)
@@ -174,7 +179,7 @@ def main(input_path, output_path):
             graph = [[] for _ in range(2 * n)]
             for u, (ux, uy) in enumerate(zip(prev_positions[::2], prev_positions[1::2])):
                 for v, (vx, vy) in enumerate(zip(curr_positions[::2], curr_positions[1::2])):
-                    dist = math.sqrt((ux - vx) ** 2 + (uy - vy) ** 2)
+                    dist = math.hypot(ux - vx, uy - vy)
                     e1 = create_edge(u, v + n, cost=dist, residual_flow=1)
                     e2 = create_edge(v + n, u, cost=-dist, residual_flow=0)
                     e1['pair'], e2['pair'] = e2, e1
@@ -196,5 +201,7 @@ def main(input_path, output_path):
 
 
 if __name__ == "__main__":
-    assert len(sys.argv) >= 3
+    if len(sys.argv) < 3:
+        print("Error: please specify input and output paths as arguments in this form: `script.py <input_path> <output_path>`", file=sys.stderr)
+        sys.exit(1)
     main(sys.argv[1], sys.argv[2])
