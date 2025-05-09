@@ -1,240 +1,224 @@
 #!/usr/bin/env python3
-import itertools
 import math
 import sys
+import itertools
 from collections import deque
 
-# --- Edge utility functions ---
 
+# --- Minimum-Cost Flow: Core Edge Functions ---
 
-def create_edge(src: int, dest: int, cost: float = 0, lower_bound: int = 0,
-                upper_bound: int = 1, flow: int = 0, residual_flow: int = 0,
-                pair: dict = None) -> dict:
-    """Create an edge with flow and cost attributes for flow network."""
+def create_edge(u, v, cost=0, lower_bound=0, upper_bound=1, flow=0, residual_flow=0, pair=None):
+    """Creates a directed edge with flow-related metadata."""
     return {
-        'u': src,
-        'v': dest,
-        'cost': cost,
-        'lower_bound': lower_bound,
-        'upper_bound': upper_bound,
-        'flow': flow,
-        'residual_flow': residual_flow,
+        'u': u, 'v': v, 'cost': cost,
+        'lower_bound': lower_bound, 'upper_bound': upper_bound,
+        'flow': flow, 'residual_flow': residual_flow,
         'pair': pair
     }
 
 
-def augment_edge(edge, flow_amount):
-    """Augments flow along an edge and updates the residual capacity."""
-    edge['residual_flow'] -= flow_amount
-    edge['flow'] += flow_amount
+def augment_edge(edge, value):
+    """Updates flow and residual capacity in the edge and its reverse pair."""
+    edge['residual_flow'] -= value
+    edge['flow'] += value
 
 
-def add_edge(graph: list[list[dict]], edge: dict) -> None:
-    """Adds an edge to the graph."""
+def add_edge(graph, edge):
+    """Adds a directed edge to the graph's adjacency list."""
     graph[edge['u']].append(edge)
 
 
-def copy_graph(graph):
-    """Creates a shallow copy of the graph (used for augmentation)."""
-    return [edges.copy() for edges in graph]
-
-
-def paired_edges(src, dest, capacity):
-    """Creates a forward and reverse edge pair with capacity for residual graph."""
+def create_edge_pair(u, v, cost, capacity):
+    """Creates a forward and reverse edge with cost and capacity."""
     forward = create_edge(
-        src, dest, residual_flow=capacity, upper_bound=capacity)
-    backward = create_edge(dest, src, residual_flow=0, upper_bound=capacity)
+        u, v, cost=cost, residual_flow=capacity, upper_bound=capacity)
+    backward = create_edge(
+        v, u, cost=-cost, residual_flow=0, upper_bound=capacity)
     forward['pair'], backward['pair'] = backward, forward
     return forward, backward
 
 
-# --- Flow algorithms ---
+def copy_graph(graph):
+    """Performs a shallow copy of graph structure (not deep copy of edges)."""
+    return [edges.copy() for edges in graph]
 
-def bfs(graph, source, sink):
-    """Breadth-first search to find augmenting paths in the residual graph."""
-    parents = {}
+
+# --- Edmonds-Karp Algorithm: Initial Feasible Flow Finder ---
+
+def bfs_augmenting_path(graph, source, sink):
+    """BFS to find an augmenting path with available residual capacity."""
+    parent = {}
     queue = deque([source])
     while queue:
-        current = queue.popleft()
-        if current == sink:
-            break
-        for edge in graph[current]:
-            if edge['v'] not in parents and edge['residual_flow'] > 0:
-                parents[edge['v']] = edge
+        node = queue.popleft()
+        for edge in graph[node]:
+            if edge['v'] not in parent and edge['residual_flow'] > 0:
+                parent[edge['v']] = edge
                 queue.append(edge['v'])
-    return parents
+                if edge['v'] == sink:
+                    return parent
+    return parent
 
 
-def calculate_augmentation(parents, source, sink):
-    """Augment flow along the path found by BFS."""
-    augment_value = math.inf
-    v = sink
-    while v != source:
-        edge = parents[v]
-        augment_value = min(augment_value, edge['residual_flow'])
-        v = edge['u']
+def apply_augmentation(parent, source, sink):
+    """Augments flow along a found path and returns the augmented amount."""
+    flow = math.inf
+    current = sink
+    while current != source:
+        edge = parent[current]
+        flow = min(flow, edge['residual_flow'])
+        current = edge['u']
 
-    v = sink
-    while v != source:
-        edge = parents[v]
-        augment_edge(edge, augment_value)
-        augment_edge(edge['pair'], -augment_value)
-        v = edge['u']
+    current = sink
+    while current != source:
+        edge = parent[current]
+        augment_edge(edge, flow)
+        augment_edge(edge['pair'], -flow)
+        current = edge['u']
 
-    return augment_value
+    return flow
 
 
 def edmonds_karp(graph, source, sink):
-    """
-    Computes max flow using Edmonds-Karp algorithm (BFS-based Ford-Fulkerson).
-    """
+    """Classic max flow algorithm using BFS repeatedly to augment flow."""
     total_flow = 0
     while True:
-        parents = bfs(graph, source, sink)
-        if sink not in parents:
+        parent = bfs_augmenting_path(graph, source, sink)
+        if sink not in parent:
             break
-        total_flow += calculate_augmentation(parents, source, sink)
+        total_flow += apply_augmentation(parent, source, sink)
     return total_flow
 
 
-def max_flow_demands(original_graph, node_balances):
-    """
-    Check if it's possible to satisfy flow demands (specified by node_balances).
-    Adds a super source and super sink to handle excess supply/demand.
-    """
-    graph = copy_graph(original_graph)
-    graph.append([])  # super_source
-    graph.append([])  # super_sink
-    super_source = len(graph) - 2
-    super_sink = len(graph) - 1
+# --- Cycle Canceling: Cost Optimization ---
 
-    for node, balance in node_balances.items():
-        if balance > 0:
-            # Node is a source (supply)
-            fwd, bwd = paired_edges(super_source, node, balance)
-            add_edge(graph, fwd)
-            add_edge(graph, bwd)
-        elif balance < 0:
-            # Node is a sink (demand)
-            fwd, bwd = paired_edges(node, super_sink, -balance)
-            add_edge(graph, fwd)
-            add_edge(graph, bwd)
+def find_negative_cycle(graph, n):
+    """Detects a negative-cost cycle using Bellman-Ford."""
+    cost = {v: 0 for v in range(n)}
+    parent = {v: None for v in range(n)}
+    last = None
 
-    edmonds_karp(graph, super_source, super_sink)
-
-    # Ensure that all supply was successfully routed
-    for edge in graph[super_source]:
-        if edge['flow'] < edge['upper_bound']:
-            return False
-    return True
-
-
-# --- Cycle canceling for min-cost flow ---
-
-def find_negative_cycle(graph, num_vertices):
-    """Bellman-Ford to detect negative cost cycles in residual graph."""
-    cost_to = {v: 0 for v in range(num_vertices)}
-    parents = {v: None for v in range(num_vertices)}
-    last_updated = None
-
-    for _ in range(num_vertices):
-        last_updated = None
+    for _ in range(n):
+        last = None
         for edge in itertools.chain.from_iterable(graph):
             if edge['residual_flow'] > 0:
-                u, v, cost = edge['u'], edge['v'], edge['cost']
-                if cost_to[v] > cost_to[u] + cost:
-                    cost_to[v] = cost_to[u] + cost
-                    parents[v] = edge
-                    last_updated = v
+                u, v, c = edge['u'], edge['v'], edge['cost']
+                if cost[v] > cost[u] + c:
+                    cost[v] = cost[u] + c
+                    parent[v] = edge
+                    last = v
 
-    if last_updated is None:
-        return parents, None
+    if last is None:
+        return parent, None
 
-    # Find cycle start
-    for _ in range(num_vertices):
-        last_updated = parents[last_updated]['u']
-    return parents, last_updated
+    for _ in range(n):
+        last = parent[last]['u']
+    return parent, last
 
 
-def cancel_cycle(parents, start_node):
-    """Augment flow along a negative cost cycle to reduce total cost."""
-    min_flow = math.inf
-    v = start_node
+def cancel_negative_cycle(parent, cycle_start):
+    """Augments flow along the detected negative cycle."""
+    delta = math.inf
+    v = cycle_start
     while True:
-        edge = parents[v]
-        min_flow = min(min_flow, edge['residual_flow'])
+        edge = parent[v]
+        delta = min(delta, edge['residual_flow'])
         v = edge['u']
-        if v == start_node:
+        if v == cycle_start:
             break
 
-    v = start_node
+    v = cycle_start
     while True:
-        edge = parents[v]
-        augment_edge(edge, min_flow)
-        augment_edge(edge['pair'], -min_flow)
+        edge = parent[v]
+        augment_edge(edge, delta)
+        augment_edge(edge['pair'], -delta)
         v = edge['u']
-        if v == start_node:
+        if v == cycle_start:
             break
 
 
-def cycle_canceling(graph, num_vertices):
-    """Repeatedly cancel negative cost cycles until none are left."""
+def cancel_cycles(graph, n):
+    """Main loop to repeatedly cancel negative-cost cycles."""
     while True:
-        parents, cycle_start = find_negative_cycle(graph, num_vertices)
-        if cycle_start is None:
+        parent, start = find_negative_cycle(graph, n)
+        if start is None:
             break
-        cancel_cycle(parents, cycle_start)
+        cancel_negative_cycle(parent, start)
 
 
-def min_cost_flow(graph, num_vertices, node_balances):
-    """Solve minimum-cost flow problem with demands using cycle canceling."""
-    if max_flow_demands(graph, node_balances):
-        cycle_canceling(graph, num_vertices)
-    else:
-        raise ValueError('Unsolvable flow problem')
+# --- Min-Cost Flow with Demand Balancing ---
+
+def is_balanced_flow_possible(original_graph, balances):
+    """Adds super source/sink and checks if flow balances are feasible."""
+    graph = copy_graph(original_graph)
+    graph.append([])  # super source
+    graph.append([])  # super sink
+    source, sink = len(graph) - 2, len(graph) - 1
+
+    for node, balance in balances.items():
+        if balance > 0:
+            e1, e2 = create_edge_pair(source, node, cost=0, capacity=balance)
+        elif balance < 0:
+            e1, e2 = create_edge_pair(node, sink, cost=0, capacity=-balance)
+        else:
+            continue
+        add_edge(graph, e1)
+        add_edge(graph, e2)
+
+    edmonds_karp(graph, source, sink)
+
+    return all(edge['flow'] >= edge['upper_bound'] for edge in graph[source])
 
 
-# --- Main I/O & matching logic ---
+def compute_min_cost_flow(graph, n, balances):
+    """Computes minimum-cost flow using cycle canceling."""
+    if not is_balanced_flow_possible(graph, balances):
+        raise ValueError("No feasible balanced flow exists.")
+    cancel_cycles(graph, n)
+
+
+# --- Main: Tracking Objects Using Frame-by-Frame Assignment ---
 
 def main(input_path, output_path):
-    """Reads position frames, computes minimum-cost bipartite matching over time."""
-    with open(input_path, mode='r+', encoding='utf8') as f_in:
-        n, num_frames = map(int, f_in.readline().split())
-        frame_graphs = []
-        previous_positions = list(map(int, f_in.readline().split()))
+    """
+    Solves the object tracking assignment problem using minimum-cost flow:
+    Matches positions between frames based on Euclidean distance.
+    """
+    with open(input_path, 'r', encoding='utf8') as f:
+        n, p = map(int, f.readline().split())
+        positions = [list(map(int, f.readline().split())) for _ in range(p)]
 
-        # Read each time step and construct flow graphs
-        for line in f_in:
-            current_positions = list(map(int, line.split()))
-            # Left: previous, Right: current
+    with open(output_path, 'w', encoding='utf8') as f_out:
+        for frame_idx in range(p - 1):
+            current_frame = positions[frame_idx]
+            next_frame = positions[frame_idx + 1]
             graph = [[] for _ in range(2 * n)]
-            for u, (x1, y1) in enumerate(zip(previous_positions[::2], previous_positions[1::2])):
-                for v, (x2, y2) in enumerate(zip(current_positions[::2], current_positions[1::2])):
-                    distance = math.hypot(x1 - x2, y1 - y2)
-                    forward = create_edge(
-                        u, v + n, cost=distance, residual_flow=1)
-                    backward = create_edge(
-                        v + n, u, cost=-distance, residual_flow=0)
-                    forward['pair'], backward['pair'] = backward, forward
-                    add_edge(graph, forward)
-                    add_edge(graph, backward)
-            frame_graphs.append(graph)
-            previous_positions = current_positions
 
-    with open(output_path, mode='w+', encoding='utf8') as f_out:
-        node_balances = {u: 1 if u < n else -1 for u in range(2 * n)}
-        for graph in frame_graphs:
-            min_cost_flow(graph, 2 * n, node_balances)
-            matching = []
+            # Build bipartite graph from current_frame to next_frame
             for u in range(n):
-                matched_edge = next(e for e in graph[u]
-                                    if e['flow'] > 0 and e['v'] >= n)
-                matching.append(matched_edge['v'] - n + 1)
-            f_out.write(f"{' '.join(map(str, matching))}\n")
+                x1, y1 = current_frame[2 * u], current_frame[2 * u + 1]
+                for v in range(n):
+                    x2, y2 = next_frame[2 * v], next_frame[2 * v + 1]
+                    cost = math.hypot(x1 - x2, y1 - y2)
+                    e1 = create_edge(u, v + n, cost=cost, residual_flow=1)
+                    e2 = create_edge(v + n, u, cost=-cost, residual_flow=0)
+                    e1['pair'], e2['pair'] = e2, e1
+                    add_edge(graph, e1)
+                    add_edge(graph, e2)
+
+            balances = {u: 1 if u < n else -1 for u in range(2 * n)}
+            compute_min_cost_flow(graph, 2 * n, balances)
+
+            # Extract assignments for current frame
+            assignment = []
+            for u in range(n):
+                matched = next(edge for edge in graph[u] if edge['flow'] > 0)
+                assignment.append(matched['v'] - n + 1)
+            f_out.write(" ".join(map(str, assignment)) + "\n")
 
 
 if __name__ == "__main__":
     if len(sys.argv) < 3:
-        print("Error: please specify input and output paths as arguments in this form: `script.py <input_path> <output_path>`", file=sys.stderr)
+        print("Usage: script.py <input_path> <output_path>", file=sys.stderr)
         sys.exit(1)
     main(sys.argv[1], sys.argv[2])
