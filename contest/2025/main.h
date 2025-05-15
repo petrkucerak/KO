@@ -122,7 +122,17 @@ class OrderList
     * @param order_list Vector of OrderList objects for all customers.
     * @param target Output stream to write the results to.
     */
-   static void print_list(vector<OrderList> &order_list, ostream &target);
+   static void print_list(vector<OrderList> &order_list, ostream &target)
+   {
+      for (vector<OrderList>::iterator customer = order_list.begin();
+           customer != order_list.end(); ++customer) {
+         for (vector<Order>::iterator order = customer->orders.begin();
+              order != customer->orders.end(); ++order) {
+            target << order->locker_id << " " << order->x << " " << order->y
+                   << " " << order->rotated << endl;
+         }
+      }
+   }
 };
 
 /**
