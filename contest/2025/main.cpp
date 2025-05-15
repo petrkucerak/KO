@@ -96,7 +96,7 @@ bool Locker::put_order(Order &order, uint32_t locker_idx)
 
       for (uint32_t x = 0; x + item_width <= width; ++x) {
          uint32_t max_height = 0;
-         // Find maximum height in [x, x + item_width)
+         // Find maximum height in [x, x + item_width]
          for (vector<pair<uint32_t, uint32_t>>::const_iterator segment =
                   skyline.begin();
               segment != skyline.end(); ++segment) {
@@ -298,8 +298,10 @@ void Solver::solve(double time_limit)
          best_objective = objective;
          best_order_list = order_list;
          best_lockers = lockers;
+#ifdef DEBUG
          cout << "Iteration " << iteration << ": Objective = " << objective
               << ", Items placed = " << items_placed << endl;
+#endif // DEBUG
       }
 
       elapsed_time = static_cast<double>(clock() - start_time) / CLOCKS_PER_SEC;

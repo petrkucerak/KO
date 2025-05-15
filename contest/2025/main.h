@@ -8,6 +8,8 @@
 #include <stdexcept>
 #include <vector>
 
+// #define DEBUG
+
 using namespace std;
 
 class Size
