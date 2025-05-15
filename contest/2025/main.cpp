@@ -249,8 +249,8 @@ void Solver::solve(double time_limit)
    srand(time(NULL));
 
    uint32_t iteration = 0;
-   // Run iterations until 80% of the time limit is reached
-   while (elapsed_time < time_limit * 0.8) {
+   // Run iterations until 95% of the time limit is reached
+   while (elapsed_time < time_limit * 0.95) {
       // Reset the objective and restore the best known state
       objective = 0;
       order_list = best_order_list;
