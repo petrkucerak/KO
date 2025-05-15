@@ -21,10 +21,10 @@ using namespace std;
 int main(int argc, char const *argv[])
 {
    // Check if the correct number of arguments is provided
-   if (argc < 4) {
-      throw invalid_argument("Please, specify program input correctly!\n"
-                             "Right input is: ./program_name <input_path> "
-                             "<output_path> <time_limit>");
+   if (argc != 4) {
+      cerr << "Usage: " << argv[0]
+           << " <input_path> <output_path> <time_limit>\n";
+      return EXIT_FAILURE;
    }
 
    // Parse and validate the time limit
