@@ -96,6 +96,7 @@ bool Locker::put_order(Order &order, uint32_t locker_idx)
 
       for (uint32_t x = 0; x + item_width <= width; ++x) {
          uint32_t max_height = 0;
+         // Find maximum height in [x, x + item_width)
          for (vector<pair<uint32_t, uint32_t>>::const_iterator segment =
                   skyline.begin();
               segment != skyline.end(); ++segment) {
@@ -105,12 +106,17 @@ bool Locker::put_order(Order &order, uint32_t locker_idx)
          }
 
          if (max_height + item_height <= height) {
+            // Verify no overlap by checking if the region [x, x + item_width) ×
+            // [max_height, max_height + item_height) is free
             bool overlap = false;
             for (vector<pair<uint32_t, uint32_t>>::const_iterator segment =
                      skyline.begin();
                  segment != skyline.end(); ++segment) {
+               // Only consider points strictly above max_height to avoid
+               // rejecting valid placements
                if (segment->first >= x && segment->first < x + item_width &&
-                   segment->second > max_height) {
+                   segment->second > max_height &&
+                   segment->second <= max_height + item_height) {
                   overlap = true;
                   break;
                }
@@ -129,19 +135,25 @@ bool Locker::put_order(Order &order, uint32_t locker_idx)
          order.y = best_y;
          order.rotated = r;
 
+         // Update skyline
          vector<pair<uint32_t, uint32_t>> new_skyline;
-         for (vector<pair<uint32_t, uint32_t>>::iterator s = skyline.begin();
-              s != skyline.end(); ++s) {
-            if (s->first < best_x || s->first >= best_x + item_width) {
-               new_skyline.push_back(*s);
+         for (uint32_t x = 0; x < width; ++x) {
+            uint32_t height = 0;
+            if (x >= best_x && x < best_x + item_width) {
+               height = best_y + item_height; // New item height
+            } else {
+               // Copy existing skyline height
+               for (vector<pair<uint32_t, uint32_t>>::const_iterator s =
+                        skyline.begin();
+                    s != skyline.end(); ++s) {
+                  if (s->first == x) {
+                     height = s->second;
+                     break;
+                  }
+               }
             }
+            new_skyline.push_back(make_pair(x, height));
          }
-
-         new_skyline.push_back(make_pair(best_x, best_y + item_height));
-         for (uint32_t x = best_x + 1; x < best_x + item_width; ++x) {
-            new_skyline.push_back(make_pair(x, best_y + item_height));
-         }
-         sort(new_skyline.begin(), new_skyline.end());
          skyline = new_skyline;
 
          customer_id = order.customer_id;
@@ -162,6 +174,7 @@ void Solver::solve(double time_limit)
 
    srand(time(NULL));
 
+   uint32_t iteration = 0;
    while (elapsed_time < time_limit * 0.8) {
       objective = 0;
       order_list = best_order_list;
@@ -195,9 +208,9 @@ void Solver::solve(double time_limit)
       sort(customer_priority.begin(), customer_priority.end(),
            [](const pair<uint32_t, double> &a,
               const pair<uint32_t, double> &b) { return a.second > b.second; });
-      random_shuffle(customer_priority.begin(),
-                     customer_priority.end()); // C++11 random_shuffle
+      random_shuffle(customer_priority.begin(), customer_priority.end());
 
+      uint32_t items_placed = 0;
       for (vector<pair<uint32_t, double>>::const_iterator cp =
                customer_priority.begin();
            cp != customer_priority.end(); ++cp) {
@@ -228,8 +241,17 @@ void Solver::solve(double time_limit)
             bool placed = false;
             for (uint32_t m = 0; m < lockers.size(); ++m) {
                if (lockers[m].put_order(order, m)) {
-                  objective += order.payment;
-                  placed = true;
+                  if (order.locker_id > 0 &&
+                      order.locker_id <= lockers.size()) {
+                     objective += order.payment;
+                     placed = true;
+                     items_placed++;
+                  } else {
+                     order.locker_id = 0;
+                     order.x = 0;
+                     order.y = 0;
+                     order.rotated = 0;
+                  }
                   break;
                }
             }
@@ -243,7 +265,17 @@ void Solver::solve(double time_limit)
          }
 
          if (all_assigned) {
-            objective += order_list[cp->first].bonus;
+            bool valid = true;
+            for (vector<Order>::const_iterator order = orders.begin();
+                 order != orders.end(); ++order) {
+               if (order->locker_id == 0) {
+                  valid = false;
+                  break;
+               }
+            }
+            if (valid) {
+               objective += order_list[cp->first].bonus;
+            }
          }
       }
 
@@ -251,9 +283,12 @@ void Solver::solve(double time_limit)
          best_objective = objective;
          best_order_list = order_list;
          best_lockers = lockers;
+         cout << "Iteration " << iteration << ": Objective = " << objective
+              << ", Items placed = " << items_placed << endl;
       }
 
       elapsed_time = static_cast<double>(clock() - start_time) / CLOCKS_PER_SEC;
+      iteration++;
    }
 
    objective = best_objective;
