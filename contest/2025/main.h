@@ -9,13 +9,11 @@
 #ifndef __MAIN_H
 #define __MAIN_H
 
+#include <cstdint>
 #include <algorithm>
-#include <fstream>
 #include <iostream>
-#include <random>
 #include <stdexcept>
 #include <vector>
-
 // #define DEBUG
 
 using namespace std;
