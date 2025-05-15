@@ -60,6 +60,13 @@ int main(int argc, char const *argv[])
    return 0;
 }
 
+bool Locker::put_order(const Order &order)
+{
+   // 1. zkusim polozit predmet po do delky v obou rotacich
+   // 2. pokud neni misto, tak zkusim polozit predmet nehoru v obou rotacich
+   // tak, abych minimalizoval vzdalenost od spodu
+}
+
 // Lockers M
 // - parameters
 // Customers N

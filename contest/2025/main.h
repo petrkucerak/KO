@@ -56,26 +56,18 @@ class OrderList
    };
 };
 
-class Skyline
-{
-   public:
-   vector<pair<uint32_t, uint32_t>> segments; // (x, height)
-
-   Skyline(uint32_t locker_width)
-   {
-      segments.emplace_back(0, 0); // Initial skyline: height 0 at x=0
-   }
-};
-
 class Locker : public Size
 {
    public:
    uint32_t customer_id; // 0 if unassigned, else customer index + 1
-   Skyline skyline;
+   // Using skyline mechanism
+   vector<pair<uint32_t, uint32_t>> skyline; // (x, height)
 
    Locker() : Size(), customer_id(0), skyline(0) {};
    Locker(uint32_t width, uint32_t height)
        : Size(width, height), customer_id(0), skyline(width) {};
+
+   bool put_order(const Order &order);
 };
 
 class Solver
