@@ -106,19 +106,34 @@ bool Locker::put_order(Order &order, uint32_t locker_idx)
          }
 
          if (max_height + item_height <= height) {
-            // Verify no overlap by checking if the region [x, x + item_width) ×
-            // [max_height, max_height + item_height) is free
+            // Verify no overlap by simulating placement
             bool overlap = false;
             for (vector<pair<uint32_t, uint32_t>>::const_iterator segment =
                      skyline.begin();
                  segment != skyline.end(); ++segment) {
-               // Only consider points strictly above max_height to avoid
-               // rejecting valid placements
+               // Check if any skyline point in the x-range is within the item's
+               // vertical span
                if (segment->first >= x && segment->first < x + item_width &&
-                   segment->second > max_height &&
-                   segment->second <= max_height + item_height) {
+                   segment->second > max_height) {
                   overlap = true;
                   break;
+               }
+            }
+            if (!overlap) {
+               // Additional check: Ensure no existing item extends into the new
+               // item's area
+               for (uint32_t check_x = x; check_x < x + item_width; ++check_x) {
+                  for (vector<pair<uint32_t, uint32_t>>::const_iterator
+                           segment = skyline.begin();
+                       segment != skyline.end(); ++segment) {
+                     if (segment->first == check_x &&
+                         segment->second > max_height) {
+                        overlap = true;
+                        break;
+                     }
+                  }
+                  if (overlap)
+                     break;
                }
             }
             if (!overlap && max_height < best_y) {
@@ -135,19 +150,19 @@ bool Locker::put_order(Order &order, uint32_t locker_idx)
          order.y = best_y;
          order.rotated = r;
 
-         // Update skyline
+         // Update skyline to reflect new item
          vector<pair<uint32_t, uint32_t>> new_skyline;
          for (uint32_t x = 0; x < width; ++x) {
             uint32_t height = 0;
             if (x >= best_x && x < best_x + item_width) {
-               height = best_y + item_height; // New item height
+               height = best_y + item_height; // Height of new item
             } else {
-               // Copy existing skyline height
+               // Preserve existing skyline height
                for (vector<pair<uint32_t, uint32_t>>::const_iterator s =
                         skyline.begin();
                     s != skyline.end(); ++s) {
                   if (s->first == x) {
-                     height = s->second;
+                     height = max(height, s->second);
                      break;
                   }
                }
